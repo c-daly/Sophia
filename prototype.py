@@ -42,7 +42,7 @@ class CodingAssistant():
                            description="useful for when you need to answer questions about current events or information not included in training. You should ask targeted questions"),
                       WriteFileTool(), ReadFileTool()]
 
-        self.llm = ChatOpenAI(temperature=1, openai_api_key="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",
+        self.llm = ChatOpenAI(temperature=1, openai_api_key=OPENAI_API_KEY,
                               verbose=True)
 
         self.agent = initialize_agent(self.tools, self.llm, agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION,
