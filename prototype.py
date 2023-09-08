@@ -25,7 +25,8 @@ class CodingAssistant():
                         Overall, Assistant is a powerful tool that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation about a particular topic, Assistant is here to assist.
 
                         If assistant does not believe it knows something, it will always at least try to search for it.
-
+                        If asked to write code, assistant will always try to write code that is as simple as possible.
+                        The assistant will not say it will perform an action if it is not going to perform that action.
                         {history}
                         Human: {human_input}
                         Assistant:"""
@@ -45,7 +46,7 @@ class CodingAssistant():
         self.llm = ChatOpenAI(temperature=1, openai_api_key=OPENAI_API_KEY,
                               verbose=True)
 
-        self.agent = initialize_agent(self.tools, self.llm, agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION,
+        self.agent = initialize_agent(self.tools, self.llm, agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION, handle_parse_error=True,
                                       verbose=True, memory=ConversationBufferMemory())
 
     def run(self, message):
