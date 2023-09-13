@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import httpx
 
 # Define the abstract base class for all tools
 class Tool(ABC):
@@ -21,6 +22,18 @@ class SearchTool(Tool):
         # The prompt can be used to provide more context to the LLM or any other search mechanism
         return f"Web search results for '{query}' would be displayed here."
 
+class WikipediaTool:
+    def invoke(query):
+        return httpx.get("https://en.wikipedia.org/w/api.php", params={
+            "action": "query",
+            "list": "search",
+            "srsearch": query,
+            "format": "json"
+        }).json()["query"]["search"][0]["snippet"]
+
+class CalculatorTool:
+    def invoke(query):
+        return eval(query)
 # Example usage
 #search_tool = SearchTool(None)  # Passing None for the model since it's not used in this mock example
 #search_result = search_tool.invoke("current weather in New York")
