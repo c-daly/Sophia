@@ -8,22 +8,23 @@ from openai_model import OpenAIModel
 import re
 import os
 import httpx
-from prompts.prompts import REACT_AGENT_PROMPT
+from prompts.prompts import REACT_AGENT_PROMPT, REACT_AGENT_PROMPT2
 
 class ReactAgent:
     def __init__(self):
         self.action_re = re.compile('^Action: (\w+): (.*)$')
         self.known_actions = {
             "wikipedia": WikipediaTool.invoke,
-            "calculate": CalculatorTool.invoke,
-            "llm": self.model_completion
+            "calculate": CalculatorTool.invoke
         }
         self.prompt = REACT_AGENT_PROMPT
         self.messages = []
         self.model = OpenAIModel("gpt-3.5-turbo")
-        self.messages.append({"role": "system", "content": self.prompt})
+        #self.messages.append({"role": "system", "content": self.prompt})
 
     def append_message(self, message, role):
+        if len(self.messages) == 0:
+            self.messages.append({"role": "system", "content": self.prompt})
         self.messages.append({"role": role, "content": message})
 
     def model_completion(self, message):
@@ -32,6 +33,7 @@ class ReactAgent:
         result = completion['content']
         self.append_message(result, "assistant")
         return result
+
     def user_interaction(self, max_turns=15):
         i = 0
         question = input("User: ")
