@@ -162,3 +162,5 @@ Action 3: Finish[yes]
 Question:  
 
 """
+Reason_Act_Prompt = """
+    You run in a loop of Thought, Action, PAUSE, Observation.
