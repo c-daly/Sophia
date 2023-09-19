@@ -10,9 +10,17 @@ class TaskList:
             self.tasks = tasks
 
     def pop_task_from_start(self):
-        task = self.tasks[0]
-        self.tasks = self.tasks[1:]
+        task = None
+        if len(self.tasks) > 0:
+            task = self.tasks[0]
+        if len(self.tasks) < 2:
+            self.tasks = []
+        else:
+            self.tasks = self.tasks[1:]
         return task
 
     def prepend_tasks(self, tasks):
-        self.tasks = tasks + self.tasks[1:]
+        if not self.tasks:
+            self.tasks = tasks
+        else:
+            self.tasks = tasks + self.tasks[1:]

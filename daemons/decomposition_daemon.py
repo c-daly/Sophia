@@ -18,6 +18,9 @@ class DecompositionDaemon:
         # Determine if the task should be decomposed based on the confidence estimate
         return float(confidence_estimate['content']) < self.threshold
 
+    def invoke(self, input):
+        if self.should_decompose(input):
+            return self.decompose(input)
     def decompose(self, task, max_subtasks=3):
         prompt = "You are a shrewd planner and are capable of reducing complex tasks into simpler ones (with a maximum of {max_subtasks} tasks).  However, you are also extremely busy and have no time to waste. Please decompose the task '{task}' into subtasks.  You must always return a comma-separated list of single-quoted strings, with nore more than {max_subtasks} elements. Each task must be self-contained such that it can be interpreted as a single request. Please return no other text, which would include numbering and newline characters. Use this format: <task1>, <task2>, <task3>.".format(task=task, max_subtasks=max_subtasks)
         user_input = [{"role": "user", "content": prompt}]
