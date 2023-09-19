@@ -1,6 +1,5 @@
 from openai_model import OpenAIModel
 from models.static_openai_wrapper import StaticOpenAIModel
-from tools.tool import DecompositionTool
 from tasks.task_list import TaskList
 class ToolBasedAgentWithFeedback:
 
@@ -11,7 +10,7 @@ class ToolBasedAgentWithFeedback:
         self.prompt = "I need to think this through step by step."
         self.task_list = TaskList()
         self.decomposition_allowed = True
-        self.nested_decomposition_limit = 3
+        self.nested_decomposition_limit = 0
         self.current_nesting_level = 0
 
     def process_input(self, user_input):
@@ -53,7 +52,6 @@ class ToolBasedAgentWithFeedback:
             while self.task_list.tasks:
                 print(self.task_list.tasks)
                 if self.decomposition_allowed and self.current_nesting_level < self.nested_decomposition_limit:
-                    dt = DecompositionTool()
                     if self.task_list.tasks:
                         task = self.task_list.pop_task_from_start()
                         new_tasks = dt.invoke(task)

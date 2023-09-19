@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  sophia:
+    build: .
+    ports:
+      - "8050:8050"  # Map the port of your Sophia app if needed. Adjust as necessary.
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/sophia  # Connecting to the MongoDB named "sophia"
+      - OPENAI_API_KEY=${OPENAI_API_KEY}  # Set your OpenAI API key here
+
+  mongo:
+    image: "mongo"
+    ports:
+      - "27017:27017"
+    volumes:
+      - sophiadata:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=sophia  # Initial database named "sophia"
+
+volumes:
+  sophiadata:

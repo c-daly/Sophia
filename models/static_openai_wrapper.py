@@ -1,5 +1,6 @@
 import os
 import openai
+import json
 
 class StaticOpenAIModel:
 
@@ -10,8 +11,9 @@ class StaticOpenAIModel:
             messages=messages,
         )
 
-        response = response_obj.choices[0].message['content'].strip()
-        return response
+        #response = response_obj.choices[0].message['content'].strip()
+        json.dumps(response_obj)
+        return response_obj
 
     @staticmethod
     def generate_embedding(text):
