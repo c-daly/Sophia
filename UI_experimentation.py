@@ -1,12 +1,18 @@
 import dash
+import time
 from dash import dcc, html
 from dash.dependencies import Input, Output
 from agents.basic_agent import BasicAgent
+#from data.pinecone_wrapper import PineconeWrapper
+from data.mongo_wrapper import MongoWrapper
+from data.milvus_wrapper import MilvusWrapper
+from models.static_openai_wrapper import StaticOpenAIModel
 
 # Create a Dash application
 app = dash.Dash(__name__)
 messages = []
 model = BasicAgent()
+mongo = MongoWrapper()
 # Define the app layout
 app.layout = html.Div([
 
@@ -58,6 +64,25 @@ app.layout = html.Div([
     ),
 ])
 
+def format_interaction_data(query, response):
+    interaction_data = {
+                "user_id": "12345",  # An identifier for the user
+                "timestamp": time.time(),  # timestamp of the interaction
+                "query": query,  # The user's question or command
+                "response": response,  # The system's response
+                "metadata": {
+                    "agent_fitness_rating": ".5", # A rating of how well the response answered the user's query (0-1), estimated by the agent
+                    "user_fitness_rating": ".5", # A rating of how well the response answered the user's query (0-1), estimated by the user
+                }
+            }
+    return interaction_data
+
+def save_interaction_to_database(query, response):
+    interaction_data = format_interaction_data(query, response)
+    mongo_response = mongo.insert_interaction(interaction_data)
+    print(f"Mongo response: {mongo_response}")
+    print(f"Mongo ID: {mongo_response.inserted_id}")
+    return mongo_response.inserted_id
 
 @app.callback(
     [Output('output-area', 'value'),
@@ -69,15 +94,26 @@ app.layout = html.Div([
 )
 def update_output(n_clicks, input_value):
     if n_clicks and input_value:
-        #messages.append(input_message)
         response = model.generate_completion(input_value)
 
-
+        milvus = MilvusWrapper()
         print(f"Response: {response}")
         # Format messages for display
-        formatted_messages = '\n'.join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in model.messages])
-        return response.choices[0].message['content'], '',input_value, str(response)
-    #return '1', '2'
+        formatted_messages = '\n'.join([f"[{msg['role'].capitalize()}]: {msg['content']}\n" for msg in model.messages])
+        response_text = response.choices[0].message['content']
+        id = save_interaction_to_database(input_value, response_text)
+        query_embedding = StaticOpenAIModel.generate_embedding(input_value)
+        response_embedding = StaticOpenAIModel.generate_embedding(response_text)
+        query_id = "q_" + str(id)
+        response_id = "r_" + str(id)
+        qr = milvus.insert_vector('sophia', vector=query_embedding, id=query_id)
+        rr = milvus.insert_vector('sophia', vector=response_embedding, id=response_id)
+        result = milvus.search_vectors(query_embedding)
+        print(f"Result: {result}")
+        print(f"qr: {qr}")
+        print(formatted_messages)
+        return formatted_messages, '', model.last_input_message, response.choices[0].message['content']
+    return '', '','', ''
 
 
 # Run the app
