@@ -15,7 +15,10 @@ model = BasicAgent()
 mongo = MongoWrapper()
 # Define the app layout
 app.layout = html.Div([
-
+    dcc.Tabs(id="tabs-example-graph", value='tab-1-example-graph', children=[
+        dcc.Tab(label='Tab One', value='tab-1-example-graph'),
+        dcc.Tab(label='Tab Two', value='tab-2-example-graph'),
+    ]),
     # Space
     html.Div(style={'height': '20px'}),
 
@@ -93,6 +96,7 @@ def save_interaction_to_database(query, response):
     [dash.dependencies.State('input-box', 'value')]
 )
 def update_output(n_clicks, input_value):
+    print(f"Entering update_output with n_clicks: {n_clicks} and input_value: {input_value}")
     if n_clicks and input_value:
         response = model.generate_completion(input_value)
 
@@ -106,8 +110,8 @@ def update_output(n_clicks, input_value):
         response_embedding = StaticOpenAIModel.generate_embedding(response_text)
         query_id = "q_" + str(id)
         response_id = "r_" + str(id)
-        qr = milvus.insert_vector('sophia', vector=query_embedding, id=query_id)
-        rr = milvus.insert_vector('sophia', vector=response_embedding, id=response_id)
+        qr = milvus.insert_vector(query_embedding, query_id)
+        rr = milvus.insert_vector(response_embedding, response_id)
         result = milvus.search_vectors(query_embedding)
         print(f"Result: {result}")
         print(f"qr: {qr}")

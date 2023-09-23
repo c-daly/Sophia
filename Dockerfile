@@ -15,3 +15,4 @@ ENV MONGO_URL=mongodb://mongo:27017/sophia
 
 # Specify the command to run when the container starts
 CMD ["python", "UI_experimentation.py"]
+#CMD ["python", "milvus_test.py"]

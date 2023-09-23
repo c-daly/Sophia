@@ -11,4 +11,4 @@ class MongoWrapper:
         try:
             return self.collection.insert_one(interaction_data)
         except Exception as e:
-            print(e)
+            print(f"Insert Exception: {e}")
