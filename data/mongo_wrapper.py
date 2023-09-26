@@ -21,6 +21,7 @@ class MongoWrapper:
             # Convert ObjectID to string
             doc["_id"] = str(doc["_id"])
 
+            doc['view_response'] = 'VIEW'
             # Flatten metadata
             if 'metadata' in doc:
                 metadata = doc.pop('metadata')

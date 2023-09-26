@@ -21,7 +21,7 @@ layout = html.Div([
     # Request and Response Textareas on the left
     # Text input component and submit button
     html.Div([
-        dcc.Input(id='input-box', type='text'),
+        dcc.Input(id='input-box', value='', type='text'),
         html.Button('Submit', id='submit-button')
     ]),
     html.Div([
@@ -37,6 +37,6 @@ layout = html.Div([
         html.Div(style={'height': '20px'}),
 
         # Text area for output display
-        html.Div(dcc.Textarea(id='output-area', style={'margin-left': '20px', 'width': '40%', 'height': '600px'}))
+        html.Div(dcc.Textarea(id='output-area', style={'marginLeft': '20px', 'width': '40%', 'height': '600px'}))
     ]),
 ])

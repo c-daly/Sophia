@@ -8,7 +8,7 @@ columns = [
     {"name": "Response", "id": "response"},
     {"name": "human fitness rating", "id": "user_fitness_rating"},
     {"name": "agent fitness rating", "id": "agent_fitness_rating"},
-
+    {"name": "View Full Response", "id": "view-response", "type": "text"}
 ]
 
 layout = html.Div([

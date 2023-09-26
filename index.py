@@ -5,13 +5,27 @@ from app import app
 from templates import master
 from callbacks.tab1_callbacks import *
 from callbacks.history_callbacks import *
-# Import and initialize callbacks (just by importing them, they'll get registered to the app)
-theme = {
-    'dark': True,
-    'detail': '#007439',
-    'primary': '#00EA64',
-    'secondary': '#6E6E6E',
-}
+import dash_bootstrap_components as dbc
+
+modal = dbc.Modal(
+    [
+        dbc.ModalHeader("Full Response"),
+        dbc.ModalBody(id="modal-body"),
+
+        dbc.ModalFooter([
+            dbc.Button("Prev", id="prev-record", className="ml-auto"),
+            dbc.Button("Next", id="next-record", className="ml-right"),
+            dbc.Button("Close", id="close-modal", className="ml-left"),
+            dbc.Button("Save", id="save-changes", className="ml-left")
+        ]),
+
+        #dbc.ModalFooter(
+#
+#            dbc.Button("Close", id="close-modal", className="ml-auto")
+#        ),
+    ],
+    id="response-modal",
+)
 
 app.model = BasicAgent()
 app.layout = html.Div([
@@ -23,6 +37,7 @@ app.layout = html.Div([
 
 
     master.footer_component,
+    modal
 ])
 
 if __name__ == '__main__':
