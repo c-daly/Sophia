@@ -8,11 +8,12 @@ WORKDIR /app
 COPY . /app
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+#RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Define the environment variable for MongoDB (this can be overridden by docker-compose)
 ENV MONGO_URL=mongodb://mongo:27017/sophia
 
 # Specify the command to run when the container starts
-CMD ["python", "UI_experimentation.py"]
+CMD ["python", "index.py"]
 #CMD ["python", "milvus_test.py"]

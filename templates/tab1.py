@@ -1,5 +1,14 @@
 # tab1.py
-
+import dash
+import time
+from dash import dcc, html
+from dash.dependencies import Input, Output
+from agents.basic_agent import BasicAgent
+from app import app
+#from data.pinecone_wrapper import PineconeWrapper
+from data.mongo_wrapper import MongoWrapper
+from data.milvus_wrapper import MilvusWrapper
+from models.static_openai_wrapper import StaticOpenAIModel
 from dash import dcc, html
 
 layout = html.Div([
@@ -31,5 +40,3 @@ layout = html.Div([
         html.Div(dcc.Textarea(id='output-area', style={'margin-left': '20px', 'width': '40%', 'height': '600px'}))
     ]),
 ])
-
-# Additional components specific to Tab 1 can be added here

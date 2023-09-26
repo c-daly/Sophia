@@ -2,19 +2,16 @@
 
 import dash_bootstrap_components as dbc
 from dash import html, dcc
-from templates import tab1, tab2
+from templates import tab1, history_tab
 
 # Header component
 header_component = dbc.Tabs(
     [
         dcc.Tabs([
-            dcc.Tab(label='Tab 0', value='tab-1', children=tab1.layout),
-            dcc.Tab(label='Tab 1', value='tab-2', children=tab2.layout),
+            dcc.Tab(label='Conversations', value='tab-1', children=tab1.layout),
+            dcc.Tab(label='History', value='tab-2', children=history_tab.layout),
         ]),
     ],
-    #brand="My Dash App",
-    #color="primary",
-    #dark=True,
 )
 
 # Footer component
