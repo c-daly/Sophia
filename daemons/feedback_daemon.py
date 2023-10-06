@@ -1,4 +1,4 @@
-from openai_model import OpenAIModel
+from exploratory.openai_model import OpenAIModel
 from prompts.prompts import FEEDBACK_AGENT_PROMPT
 class FeedbackDaemon:
     def __init__(self):

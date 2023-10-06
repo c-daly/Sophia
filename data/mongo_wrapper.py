@@ -3,6 +3,8 @@ from pymongo import MongoClient
 import pandas as pd
 import os
 import bson
+import config
+
 class MongoWrapper:
     def __init__(self):
         self.db_url = os.environ["MONGO_URL"]
@@ -11,6 +13,7 @@ class MongoWrapper:
         self.collection = self.db['interactions']
 
     def insert_interaction(self, interaction_data):
+        config.logger.debug(f"Inserting interaction data: {interaction_data}")
         try:
             return self.collection.insert_one(interaction_data)
         except Exception as e:
@@ -57,6 +60,7 @@ class MongoWrapper:
         #print(f"Data: {data}")
         data_list = list(cursor)
         processed_data = self.preprocess_data(data_list)
+        config.logger.debug(f"Processed data: {processed_data}")
         return processed_data
 
     # Add any other necessary methods here, such as methods for inserting data, updating data, etc.

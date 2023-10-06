@@ -12,31 +12,31 @@ from models.static_openai_wrapper import StaticOpenAIModel
 from dash import dcc, html
 
 layout = html.Div([
-    html.H3('Tab 1 Content'),
+    html.H3('Conversation View'),
 
-
-    # Space
-    html.Div(style={'height': '20px'}),
-
-    # Request and Response Textareas on the left
-    # Text input component and submit button
     html.Div([
         dcc.Input(id='input-box', value='', type='text'),
-        html.Button('Submit', id='submit-button')
-    ]),
-    html.Div([
+        html.Button('Submit', id='submit-button'),
         html.Div([
-            html.Label('Last Outgoing Request:'),
-            dcc.Textarea(id='last-request', style={'width': '100%', 'height': '200px'}),
+            html.Div([
 
-            html.Label('Last Incoming Response:'),
-            dcc.Textarea(id='last-response', style={'width': '100%', 'height': '200px'}),
-        ], style={'width': '40%', 'float': 'left'}),
+                html.Label('Last Incoming Response:'),
+                # dcc.Textarea(id='last-response', style={'width': '100%', 'height': '200px'}),
+                dcc.Markdown(id='last-response', mathjax=True, style={'width': '100%'}, dangerously_allow_html=True),
+            ], style={'width': '50%', 'float': 'left'}),
+            html.Div([
+                html.Div([
+                    html.Label('Last Outgoing Request:'),
+                    html.Br(),
+                    dcc.Textarea(id='last-request', style={'width': '100%', 'height': '200px'}),
+                    html.Br(),
+                    html.Label('Conversation History:'),
+                    html.Br(),
+                    html.Div(dcc.Textarea(id='output-area', style={'width': '100%', 'height': '600px'}))
+                ]),
+            ], style={'width': '50%', 'float': 'right'}),
+        ]),
 
-        # Space
-        html.Div(style={'height': '20px'}),
-
-        # Text area for output display
-        html.Div(dcc.Textarea(id='output-area', style={'marginLeft': '20px', 'width': '40%', 'height': '600px'}))
     ]),
 ])
+

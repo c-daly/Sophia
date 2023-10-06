@@ -1,6 +1,6 @@
 # index.py
-from agents.basic_agent import BasicAgent
-from dash import html
+import dash
+from agents.command_agent import CommandAgent
 from app import app
 from templates import master
 from callbacks.tab1_callbacks import *
@@ -20,15 +20,15 @@ modal = dbc.Modal(
         ]),
 
         #dbc.ModalFooter(
-#
+        #
 #            dbc.Button("Close", id="close-modal", className="ml-auto")
 #        ),
     ],
     id="response-modal",
 )
 
-app.model = BasicAgent()
-app.layout = html.Div([
+app.model = CommandAgent()
+app.layout = dash.html.Div([
 
     # Master layout components (like header, footer, etc.)
     master.header_component,
@@ -41,4 +41,4 @@ app.layout = html.Div([
 ])
 
 if __name__ == '__main__':
-    app.run_server(debug=True, host='0.0.0.0')
+    app.run_server(debug=False, host='0.0.0.0')

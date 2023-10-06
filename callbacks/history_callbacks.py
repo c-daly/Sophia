@@ -8,28 +8,30 @@ import pandas as pd
     Output("modal-body", "children"),
     Input("history-datatable", "active_cell"),
     Input("close-modal", "n_clicks"),
+    Input("next-record", "n_clicks"),
+    Input("prev-record", "n_clicks"),
     State("history-datatable", "data")
 )
-def toggle_modal(active_cell, close_clicks, table_data):
+def toggle_modal(active_cell, close_clicks, next_clicks, prev_clicks, table_data):
     ctx = callback_context
 
     if not ctx.triggered:
         return False, ""
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
     if trigger_id == "history-datatable" and active_cell:
         row_data = table_data[active_cell["row"]]
-        return True, row_data["response"]
+        return True, ""
 
     elif trigger_id == "next-record" and active_cell:
-        # Navigate to the next record
+    #    # Navigate to the next record
         next_row_index = (active_cell["row"] + 1) % len(table_data)
-        return True, table_data[next_row_index]["response"]
-
+        #return True, table_data[next_row_index]["response"]
+        return True, ""
     elif trigger_id == "prev-record" and active_cell:
         # Navigate to the previous record
         prev_row_index = (active_cell["row"] - 1) % len(table_data)
-        return True, table_data[prev_row_index]["response"]
+        #return True, table_data[prev_row_index]["response"]
+        return True, ""
 
     elif trigger_id == "close-modal":
         return False, ""
@@ -57,13 +59,13 @@ def update_table(page_current, page_size, sort_by, filter_query):
     #    dff = df
     data = mongo.fetch_data()
 
-    tooltip_data = [
-        {
-            'response': {'value': doc['response'], 'type': 'markdown'}
-        }
-        for doc in data
-    ]
-    return data, tooltip_data
+    #tooltip_data = [
+    #    {
+    #        'response': {'value': doc['response'], 'type': 'markdown'}
+    #    }
+    #    for doc in data
+    #]
+    return data, [{}]
     #return dff.iloc[
     #    page_current * page_size: (page_current + 1) * page_size
     #].to_dict('records')

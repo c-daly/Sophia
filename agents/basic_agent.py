@@ -1,5 +1,8 @@
+from agents.abstract_agent import AbstractAgent
 from models.static_openai_wrapper import StaticOpenAIModel
-class BasicAgent:
+
+
+class BasicAgent(AbstractAgent):
 
     def __init__(self):
         # Initialize tools and memory
@@ -9,15 +12,15 @@ class BasicAgent:
         self.last_response_message = None
 
     def append_message(self, message, role):
-        #if len(self.messages) == 0:
-            #self.messages.append({"role": "system", "content": self.prompt})
+        # if len(self.messages) == 0:
+        # self.messages.append({"role": "system", "content": self.prompt})
         if role == "user":
             self.last_input_message = message
         elif role == "assistant":
             self.last_response_message = message
         self.messages.append({"role": role, "content": message})
 
-    def generate_completion(self, text):
+    def generate_query_sequence(self, text):
         try:
             response = None
 

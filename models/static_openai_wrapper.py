@@ -1,4 +1,4 @@
-import os
+import config
 import openai
 import json
 
@@ -6,13 +6,16 @@ class StaticOpenAIModel:
 
     @staticmethod
     def generate_response(messages):
+        config.logger.debug(f"Entering generate_response with messages: {messages}")
         response_obj = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            #model="gpt-3.5-turbo",
+            model="gpt-4",
             messages=messages,
         )
 
-        #response = response_obj.choices[0].message['content'].strip()
-        json.dumps(response_obj)
+        #return json.dumps(response_obj)
+        #response = json.dumps(response)
+        config.logger.debug(f"Received response: {response_obj}")
         return response_obj
 
     @staticmethod

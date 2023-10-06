@@ -16,7 +16,6 @@ class MilvusWrapper:
                 FieldSchema(name="embeddings", dtype=DataType.FLOAT_VECTOR, dim=dimension)
             ]
 
-
             schema = CollectionSchema(fields, "Sophia's embeddings database")
 
             collection = Collection(self.collection_name, schema)

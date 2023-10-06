@@ -1,4 +1,4 @@
-from openai_model import OpenAIModel
+from exploratory.openai_model import OpenAIModel
 
 class DecompositionDaemon:
     def __init__(self, threshold=0.95,

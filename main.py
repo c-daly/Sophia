@@ -1,6 +1,7 @@
-from enhanced_agent import EnhancedAgent
-from agents.react_agent import ReactAgent
-import json
+from exploratory.enhanced_agent import EnhancedAgent
+from exploratory.react_agent import ReactAgent
+
+
 def main_interaction_loop():
     agent = EnhancedAgent()
     print("Welcome to the Enhanced Agent!")
