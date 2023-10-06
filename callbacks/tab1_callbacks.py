@@ -63,6 +63,6 @@ def update_output(n_clicks, input_value):
         #print(f"qr: {qr}")
         #response = json.loads(response.choices[0].message['content'])
         #response_content = response['response']
-        return formatted_messages, '', app.model.last_input_message, response_content
+        return formatted_messages, '', app.model.last_input_message, response
     return '', '','', ''
 

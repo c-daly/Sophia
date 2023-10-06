@@ -9,6 +9,7 @@ class CommandAgent(AbstractAgent):
 
     def __init__(self):
         # Initialize tools and memory
+        self.summaries = []
         self.state = "IDLE"
         self.logger = config.logger
         self.messages = []
@@ -21,7 +22,9 @@ class CommandAgent(AbstractAgent):
                         Record your analysis in one or two words in the assessment variable.
 
                         If you believe you need clarification or if a topic is simply too broad to answer succinctly, 
-                        record your response_type as clarification.
+                        record your response_type as clarification. Please don't be in too much of a hurry to ask for clarification.
+                        If a credible snapshot of the information can be given, do so, and give the user the opportunity to
+                        ask follow-up questions when you confirm the response.
 
                         If you are prepared to reply to the query, record your response_type as confirmation. The response
                         field will contain your response to the user, plus a request for confirmation that the user
@@ -54,6 +57,8 @@ class CommandAgent(AbstractAgent):
                         
                         You must always seek confirmation from the user that their inquiry has been addressed satisfactorily,
                         except in the case you are unable to answer the query or you are asking for clarification.
+                        You must always ask for confirmation in a way that forces a yes or no response, with yes
+                        indicating the line of inquiry can be closed.
                         
                         Please validate that all quotes are properly escaped before returning. The content portion of your response
                         will be used as an argument to python's eval function, so it's important that the response is
@@ -79,6 +84,14 @@ class CommandAgent(AbstractAgent):
         return interaction_data
 
     def save_interaction_to_database(self):
+        summary_messages = list(self.messages)
+        summary_messages.append({"role": "system", "content": "Please summarize the preceding conversation. Please don't neglect to include the factual content when summarizing."})
+        summary = StaticOpenAIModel.generate_response(summary_messages)
+        self.logger.debug(f"Summary: {summary}")
+        self.messages = []
+        self.messages.append({"role": "system", "content": self.prompt})
+        self.messages.append({"role": "system", "content": summary.choices[0].message['content']})
+        self.summaries.append(summary.choices[0].message['content'])
         # This can't stay here but just doing it this way for refactor
         interaction_data = self.format_interaction_data()
         mongo_response = config.mongo.insert_interaction(interaction_data)
@@ -96,7 +109,7 @@ class CommandAgent(AbstractAgent):
         self.messages.append({"role": role, "content": message})
 
     def generate_query_sequence(self, text):
-        self.logger.debug(f"Entering generate_query_sequence with text: {text}")
+        #self.logger.debug(f"Entering generate_query_sequence with text: {text}")
         try:
             response = None
 
@@ -115,6 +128,7 @@ class CommandAgent(AbstractAgent):
                 response = StaticOpenAIModel.generate_response(self.messages)
                 response_dict = response.to_dict()
                 res = response_dict['choices'][0]['message']['content']
+                config.logger.debug(f"debug res: {res}, type: {type(res)}")
                 res_dict = json.loads(res, strict=False)
             self.logger.debug(f"res_dict: {res_dict}, type: {type(res_dict)}")
             self.logger.debug(f"response: {res_dict['response']}")
