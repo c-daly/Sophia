@@ -2,11 +2,8 @@
 import config
 from dash import Input, Output, State, dcc
 from app import app  # Import the app instance from app.py
-from models.static_openai_wrapper import StaticOpenAIModel
-from data.mongo_wrapper import MongoWrapper
-from data.milvus_wrapper import MilvusWrapper
+
 import time
-import json
 import markdown
 
 def format_interaction_data(query, response):
@@ -23,7 +20,8 @@ def format_interaction_data(query, response):
 
 def save_interaction_to_database(query, response):
     # This can't stay here but just doing it this way for refactor
-    mongo = MongoWrapper()
+    #mongo = MongoWrapper()
+    #milvus = MilvusWrapper()
     interaction_data = format_interaction_data(query, response)
     mongo_response = mongo.insert_interaction(interaction_data)
     print(f"Mongo response: {mongo_response}")

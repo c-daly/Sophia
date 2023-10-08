@@ -20,6 +20,9 @@ class StaticOpenAIModel:
 
     @staticmethod
     def generate_embedding(text):
+        #config.logger.debug(f"Entering generate_embedding with text: {text}")
         response = openai.Embedding.create(model="text-embedding-ada-002", input=text)
+        #config.logger.debug(f"Received response: {response}")
         embedding = response.data[0].embedding
+        config.logger.debug(f"Received embedding: {embedding}")
         return embedding
