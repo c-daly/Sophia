@@ -2,9 +2,9 @@ from dash import dcc, html, dash_table
 from dash.dash_table import DataTable
 
 columns = [
-    {"name": "User ID", "id": "user_id"},
+    {"name": "ID", "id": "_id"},
     #{"name": "Timestamp", "id": "timestamp"},
-    #{"name": "Query", "id": "query"},
+    {"name": "Query", "id": "query"},
     #{"name": "Response", "id": "response"},
     #{"name": "messages", "id": "messages"},
     #{"name": "human fitness rating", "id": "user_fitness_rating"},
