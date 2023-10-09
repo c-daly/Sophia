@@ -1,8 +1,6 @@
-import pymongo
 from pymongo import MongoClient
-import pandas as pd
 import os
-import bson
+import pandas as pd
 import config
 
 class MongoWrapper:
@@ -13,7 +11,7 @@ class MongoWrapper:
         self.collection = self.db['interactions']
 
     def insert_interaction(self, interaction_data):
-        config.logger.debug(f"Inserting interaction data: {interaction_data}")
+        #config.logger.debug(f"Inserting interaction data: {interaction_data}")
         try:
             return self.collection.insert_one(interaction_data)
         except Exception as e:
@@ -24,12 +22,12 @@ class MongoWrapper:
             # Convert ObjectID to string
             doc["_id"] = str(doc["_id"])
 
-            doc['view_response'] = 'VIEW'
+            #doc['view_response'] = 'VIEW'
             # Flatten metadata
-            if 'metadata' in doc:
-                metadata = doc.pop('metadata')
-                doc['agent_fitness_rating'] = metadata.get('agent_fitness_rating')
-                doc['user_fitness_rating'] = metadata.get('user_fitness_rating')
+            #if 'metadata' in doc:
+            #    metadata = doc.pop('metadata')
+            #    doc['agent_fitness_rating'] = metadata.get('agent_fitness_rating')
+            #    doc['user_fitness_rating'] = metadata.get('user_fitness_rating')
 
         return data_list
     def fetch_data(self, page_current=0, page_size=10, sort_by=None, filter_query=None):
@@ -60,7 +58,8 @@ class MongoWrapper:
         #print(f"Data: {data}")
         data_list = list(cursor)
         processed_data = self.preprocess_data(data_list)
-        config.logger.debug(f"Processed data: {processed_data}")
+        #config.logger.debug(f"Processed data: {processed_data}")
+        #return pd.DataFrame(processed_data)
         return processed_data
 
     # Add any other necessary methods here, such as methods for inserting data, updating data, etc.

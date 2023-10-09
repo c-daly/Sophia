@@ -18,8 +18,6 @@ class ConversationalAgent(AbstractAgent):
         self.last_response_message = None
 
     def append_message(self, message, role):
-        # if len(self.messages) == 0:
-        # self.messages.append({"role": "system", "content": self.prompt})
         if role == "user":
             self.last_input_message = message
         elif role == "assistant":

@@ -3,12 +3,12 @@ from dash.dash_table import DataTable
 
 columns = [
     {"name": "User ID", "id": "user_id"},
-    {"name": "Timestamp", "id": "timestamp"},
+    #{"name": "Timestamp", "id": "timestamp"},
     #{"name": "Query", "id": "query"},
     #{"name": "Response", "id": "response"},
     #{"name": "messages", "id": "messages"},
-    {"name": "human fitness rating", "id": "user_fitness_rating"},
-    {"name": "agent fitness rating", "id": "agent_fitness_rating"},
+    #{"name": "human fitness rating", "id": "user_fitness_rating"},
+    #{"name": "agent fitness rating", "id": "agent_fitness_rating"},
     {"name": "View Full Response", "id": "view-response", "type": "text"}
 ]
 
@@ -20,7 +20,7 @@ layout = html.Div([
     html.Div([
         html.Label("Search:"),
         dcc.Input(id='history-search-input', type='text', placeholder='Enter keywords...'),
-
+        html.Button("Search", id='history-search-button'),
         # Optionally, add a date range picker or other filters here
         # ...
     ], style={'marginBottom': '10px'}),
@@ -31,8 +31,8 @@ layout = html.Div([
         columns=columns,
 
         page_size=10,  # number of rows per page
-        page_action='custom',
-        sort_action='custom',
+        #page_action='custom',
+        #sort_action='custom',
         sort_mode='multi',
         sort_by=[],
         filter_action='custom',  # enable filtering

@@ -1,6 +1,8 @@
 import logging
 from data.mongo_wrapper import MongoWrapper
 
+# milvus takes forever to load
+milvus = None
 mongo = MongoWrapper()
 logger = logging.getLogger('sophia')
 handler = logging.StreamHandler()
