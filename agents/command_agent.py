@@ -91,7 +91,7 @@ class CommandAgent(AbstractAgent):
             if self.state == "CONFIRMATION_REQUESTED" and text == "yes":
                 self.save_interaction_to_database()
                 self.state = "IDLE"
-            if res_dict['response_type'] == "confirmation" and self.state != "CONFIRMATION_REQUESTED":
+            elif res_dict['response_type'] == "confirmation" and self.state != "CONFIRMATION_REQUESTED":
                 self.state = "CONFIRMATION_REQUESTED"
 
             return res_dict['response']

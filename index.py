@@ -1,5 +1,6 @@
 # index.py
 import dash
+from dash import html
 from agents.command_agent import CommandAgent
 from app import app
 from templates import master
@@ -10,7 +11,11 @@ import dash_bootstrap_components as dbc
 modal = dbc.Modal(
     [
         dbc.ModalHeader("Full Response"),
-        dbc.ModalBody(id="modal-body"),
+        dbc.ModalBody(id="modal-body", children=[
+            html.Div([
+                dcc.Markdown(id='modal-messages', mathjax=True, dangerously_allow_html=True, style={'width': '100%'}),
+            ])
+        ]),
 
         dbc.ModalFooter([
             dbc.Button("Prev", id="prev-record", className="ml-auto"),
