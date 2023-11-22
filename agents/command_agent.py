@@ -52,6 +52,8 @@ class CommandAgent(AbstractAgent):
         summary_embedding = StaticOpenAIModel.generate_embedding(summary)
         self.milvus.insert_vector(summary_embedding, str(id))
         #self.messages.append({"role": "assistant", "content": summary})
+        self.messages = []
+        self.messages.append({"role": "system", "content": self.prompt})
         return mongo_response.inserted_id
 
     def append_message(self, message, role):

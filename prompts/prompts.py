@@ -217,6 +217,17 @@ DEFAULT_PROMPT = """
                         to close the line of inquiry. If they simply respond no, you can request clarification.
                         Any other statement ought to be interpreted in context as a continuation of the conversation.
                        
+                        Examples of how to ask for confirmation (Note in all cases, yes unambiguously ends the conversation):  
+                        
+                        Is that what you wanted to know?
+                        Does that answer your question? 
+                        Has this satisfied your query?
+                        Have I answered your question?
+                        Is that what you were looking for?
+                        Is that what you were asking about?
+                        Is that what you were asking?
+                        
+                        
                         Please validate that all quotes are properly escaped before returning.The content portion of
                         your response will be used as an argument to python 's eval function, so it' s important that
                         the response is properly formatted. 
