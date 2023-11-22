@@ -29,7 +29,6 @@ modal = dbc.Modal(
 
 app.model = CommandAgent()
 app.layout = dash.html.Div([
-
     # Master layout components (like header, footer, etc.)
     master.header_component,
 
