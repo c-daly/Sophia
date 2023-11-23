@@ -9,7 +9,7 @@ columns = [
     #{"name": "messages", "id": "messages"},
     #{"name": "human fitness rating", "id": "user_fitness_rating"},
     #{"name": "agent fitness rating", "id": "agent_fitness_rating"},
-    {"name": "View Full Response", "id": "view-response", "type": "text"}
+    {"name": "Distance", "id": "distance"},
 ]
 
 layout = html.Div([
@@ -40,10 +40,10 @@ layout = html.Div([
     ),
 
     # Data Control Area (if needed)
-    html.Div([
-        html.Button("Edit", id='edit-button'),
-        html.Button("Delete", id='delete-button'),
-        html.Button("Export", id='export-button')
-    ], style={'marginTop': '10px'})
+    #html.Div([
+    #    html.Button("Edit", id='edit-button'),
+    #    html.Button("Delete", id='delete-button'),
+    #    html.Button("Export", id='export-button')
+    #], style={'marginTop': '10px'})
 ])
 

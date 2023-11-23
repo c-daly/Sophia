@@ -48,14 +48,11 @@ class MongoWrapper:
         #    sort_column = sort_by[0]['column_id']
         #    sort_direction = pymongo.ASCENDING if sort_by[0]['direction'] == 'asc' else pymongo.DESCENDING
         #    cursor = self.collection.find().sort(sort_column, sort_direction)
-        #else:
-        cursor = self.collection.find()
+        config.logger.debug(f"Filter query: {filter_query}")
+        cursor = self.collection.find(filter_query)
 
         print(f"Cursor: {cursor}")
-        # Handle filtering here if filter_query is provided (optional)
-        # ...
 
-        # Fetch the relevant subset of data
         #print(f"Data: {data}")
         data_list = list(cursor)
         processed_data = self.preprocess_data(data_list)
