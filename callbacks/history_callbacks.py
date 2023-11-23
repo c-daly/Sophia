@@ -79,9 +79,7 @@ def toggle_modal(active_cell, close_clicks, next_clicks, prev_clicks, table_data
 
 def format_mongo_doc(doc, distance):
     config.logger.debug(f"doc ID: {doc['_id']}")
-    new_doc = {}
-    new_doc['_id'] = doc['_id']
-    new_doc['query'] = doc['messages'][0]['content']
+    new_doc = {'_id': doc['_id'], 'query': doc['messages'][0]['content']}
     config.logger.debug(f"doc['messages']: {doc['messages']}")
     new_doc['messages'] = doc['messages']
     new_doc['distance'] = distance
@@ -106,7 +104,8 @@ def update_table(search_query, n_clicks):
         # all of this fetching of data and formatting
         # needs to move elsewhere.  This function should
         # really just be able to call a function that returns
-        # the data in the format that the datatable expects.
+        # the data in the format that the datatable expects,
+        # and possibly manipulate it for display purposes.
         config.logger.debug(f"{search_query}, n_clicks: {n_clicks}")
         query_embedding = StaticOpenAIModel.generate_embedding(search_query)
         results = config.milvus.search_vectors(query_embedding)
@@ -117,61 +116,24 @@ def update_table(search_query, n_clicks):
             for match in result:
                 ids.append(ObjectId(match.id))
                 distances.append(match.distance)
-                # config.logger.debug(f"match: {match.id}")
-        # ids = results[0].ids
-        # distances = results[0].distances
+
         filter_query = {"_id": {"$in": ids}}
         data = mongo.fetch_data(filter_query=filter_query)
         mongo_docs_map = {ObjectId(doc['_id']): doc for doc in data}
         joined_data = []
-        #for milvus_id, distance in zip(ids, distances):
-        #    mongo_doc = mongo_docs_map.get(ObjectId(milvus_id))
-        #    if mongo_doc:
-                # fetches element from data with matching id
-        #        doc = data[ids.index(milvus_id)]
-        #        formatted_doc = format_mongo_doc(doc, distance)
-        #        formatted_doc['distance'] = distance
-        #        config.logger.debug(f"formatted_doc: {formatted_doc}")
-        #        joined_data.append(formatted_doc)
         for milvus_id, distance in zip(ids, distances):
             mongo_doc = mongo_docs_map.get(ObjectId(milvus_id))
             if mongo_doc:
                 formatted_doc = {
-                    "_id": str(mongo_doc['_id']),  # Converting ObjectId to string
-                    "query": mongo_doc.get("query", ""),  # Assuming 'query' is a field in your MongoDB document
+                    "_id": str(mongo_doc['_id']),
+                    "query": mongo_doc.get("query", ""),
                     "distance": distance,
                     "messages": mongo_doc.get("messages", "")
                 }
                 joined_data.append(formatted_doc)
         # Sort by distance
         joined_data.sort(key=lambda x: x['distance'])
-        #config.logger.debug(f"joined_data: {joined_data}")
         data = joined_data
-        # data = pd.DataFrame(data)
-        # df = pd.DataFrame(data)
-        # queries = df['messages']  # .apply(lambda x: x[1]['content'])
-        # config.logger.debug(f"queries: {df}, type: {type(df)}")
     else:
         data = mongo.fetch_data()
-
-    # if len(sort_by):
-    #    dff = df.sort_values(
-    #        [col['column_id'] for col in sort_by],
-    #        ascending=[
-    #            col['direction'] == 'asc'
-    #            for col in sort_by
-    #        ],
-    #        inplace=False
-    #    )
-    # else:
-    #    dff = df
-    # tooltip_data = [
-    #    {
-    #        'response': {'value': doc['response'], 'type': 'markdown'}
-    #    }
-    #    for doc in data
-    # ]
     return [data]
-    # return dff.iloc[
-    #    page_current * page_size: (page_current + 1) * page_size
-    # ].to_dict('records')
