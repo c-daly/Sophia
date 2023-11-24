@@ -1,15 +1,25 @@
 from pymilvus import Milvus, DataType, IndexType, CollectionSchema, FieldSchema, connections, Collection, utility
 class MilvusWrapper:
+    # This connection needs to be made lazy
     def __init__(self, host='standalone', port='19530', collection_name='sophia'):
-        connections.connect(host=host, port=port)
+        self.connected = False
         self.collection_name = collection_name
+        self.collection = None
+        self.port = port
+        self.host = host
+
+    def make_connection(self):
+        connections.connect(host=self.host, port=self.port)
         if not utility.has_collection(self.collection_name):
             self.collection = self.create_collection()
         else:
             self.collection = Collection(self.collection_name)
         self.collection.load()
+        self.connected = True
 
     def create_collection(self, dimension=1536):
+        if not self.connected:
+            self.make_connection()
         if not utility.has_collection(self.collection_name):
             fields = [
                 FieldSchema(name="id", dtype=DataType.VARCHAR, is_primary=True, auto_id=False, max_length=100),
@@ -32,6 +42,8 @@ class MilvusWrapper:
             #    self.client.create_collection(collection_name, fields=[embedding_id, embedding])
 
     def insert_vector(self, vector, id):
+        if not self.connected:
+            self.make_connection()
         # Insert the vector into the collection
         record = {
             "id": id,
@@ -43,12 +55,14 @@ class MilvusWrapper:
         except Exception as e:
             print(f"Milvus exception: {e}")
     def insert_vectors(self, vectors):
+        if not self.connected:
+            self.make_connection()
         # Insert the vectors into the collection
-        #return self.client.insert(collection_name, records=vectors, field_name="embedding")
-        #return self.client.insert(collection_name, records=vectors)
         return self.client.insert(self.collection_name, records=vectors)
 
     def search_vectors(self, query_vector, top_k=10):
+        if not self.connected:
+            self.make_connection()
         #collection_name = "sophia_embeddings"
         try:
             # Search for similar vectors in the collection
@@ -59,16 +73,13 @@ class MilvusWrapper:
         return results
 
     def delete_vectors(self, collection_name, ids):
+        if not self.connected:
+            self.make_connection()
         # Delete vectors by their IDs
         self.client.delete_entity_by_id(collection_name, ids)
 
     def drop_collection(self, collection_name):
+        if not self.connected:
+            self.make_connection()
         # Drop the entire collection
         self.client.drop_collection(collection_name)
-
-# Usage:
-#milvus_wrapper = MilvusWrapper()
-#milvus_wrapper.create_collection('my_collection')
-#ids = milvus_wrapper.insert_vectors('my_collection', [[1.0]*768, [2.0]*768])
-#print(milvus_wrapper.search_vectors('my_collection', [1.0]*768))
-#milvus_wrapper.delete_vectors('my_collection', ids)

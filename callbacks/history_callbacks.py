@@ -87,26 +87,12 @@ def format_mongo_doc(doc, distance):
     return new_doc
 
 
-@app.callback(
-    [Output('history-datatable', 'data')],
-    [Input('history-search-input', 'value'),
-     Input('history-search-button', 'n_clicks')]
-)
-# TODO: Serious cleanup and refactoring required here
-def update_table(search_query, n_clicks):
+def fetch_similar_interactions(search_query):
+    config.logger.debug(f"fetch_similar_interactions called with search_query: {search_query}")
     mongo = config.mongo
-    config.logger.debug(f"update_table called with page_current: search_query: {search_query}, n_clicks: {n_clicks}")
-    data = None
-    if n_clicks:
-        if not config.milvus:
-            config.milvus = MilvusWrapper()
-
-        # all of this fetching of data and formatting
-        # needs to move elsewhere.  This function should
-        # really just be able to call a function that returns
-        # the data in the format that the datatable expects,
-        # and possibly manipulate it for display purposes.
-        config.logger.debug(f"{search_query}, n_clicks: {n_clicks}")
+    if not config.milvus:
+        config.milvus = MilvusWrapper()
+    if search_query:
         query_embedding = StaticOpenAIModel.generate_embedding(search_query)
         results = config.milvus.search_vectors(query_embedding)
         ids = []
@@ -137,3 +123,15 @@ def update_table(search_query, n_clicks):
     else:
         data = mongo.fetch_data()
     return [data]
+
+# TODO: Serious cleanup and refactoring required here
+@app.callback(
+    [Output('history-datatable', 'data')],
+    [Input('history-search-input', 'value'),
+     Input('history-search-button', 'n_clicks')]
+)
+def update_table(search_query, n_clicks):
+    # This method should really have a lot more
+    # UI related functionality, but it's just
+    # not a priority right now.
+    return fetch_similar_interactions(search_query)
