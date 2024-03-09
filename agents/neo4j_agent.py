@@ -59,7 +59,6 @@ class Neo4jAgent(AbstractAgent):
             response = StaticOpenAIModel.generate_response(self.messages)
             response_dict = response.to_dict()
             res = response_dict['choices'][0]['message']['content']
-            config.logger.debug(f"response: {response}")
             #try:
             #    res_dict = json.loads(res, strict=False)
             #    config.logger.debug(f"res_dict: {res_dict}, type: {type(res_dict)}")
@@ -75,6 +74,7 @@ class Neo4jAgent(AbstractAgent):
             #    res_dict = json.loads(res, strict=False)
             self.append_message(res, "assistant")
             
+            config.logger.debug(f"res: {res}")
             cypher_query = TextToCypherDaemon.generate_cypher(res)
             self.neo.query(cypher_query)
             #log_message = f"User query: {text}, Cypher query: {cypher_query}, Response: {response}"

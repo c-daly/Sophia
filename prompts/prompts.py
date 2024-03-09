@@ -238,6 +238,19 @@ SUMMARY_PROMPT = """
         summarizing. Please omit any mention of the user's confirmation at the end. It's sufficient to summarize the 
         conversation up to the point of the user's confirmation.
 """
+KG_QUERY_PROMPT = """
+Generate a Cypher query to retrieve entities and their relationships from the knowledge graph related to the topic of interest. The query should identify nodes and edges that are directly and indirectly associated with this topic, providing a comprehensive overview of the existing data landscape. This will inform the integration of new information related to the topic, ensuring relevance and preventing duplication. Consider including entities of various types and their connections that could be pertinent.
+
+You must account for routine differences in the text, such as capitalization and pluralization, to ensure the query is robust and can handle variations in the input data.
+Example:
+    Topic of interest: derivatives
+    Output: 
+        MATCH (n)-[r]-(m)
+        WHERE toLower(n.name) CONTAINS 'derivatives'
+        RETURN n, r, m
+Your reply must be a valid Cypher query that can be executed in a Neo4j instance. Include no extraneous text. Failure to provide a valid query will result in a negative reward.
+Topic of Interest: {topic}
+"""
 
 KG_PROMPT = """
 Translate the following descriptive text into a valid Cypher query that models the information using Neo4j. The description is based on schema.org standards, so please identify relevant schema.org types and properties to structure the data accurately within the Neo4j database. Ensure to use MERGE to avoid creating duplicate nodes, SET for adding or updating properties, and properly define relationships between entities. Here's the description provided:
@@ -275,6 +288,9 @@ Translate the following descriptive text into a valid Cypher query that models t
         MERGE (water)-[:UNDERGOES]->(freezing)-[:RESULTS_IN]->(ice)
         RETURN water, freezing, ice;
 
+EXISTING DATA: 
+    {existing_data}
+IT IS ESSENTIAL THAT ALL SPECIAL CHARACTERS ARE ESCAPED IN THE RETURNED QUERY.
 IT IS ESSENTIAL THAT THE RETURNED QUERY IS IN A VALID CYPHER FORMAT THAT CAN BE EXECUTED WITHOUT ERROR IN NEO4J.
 FAILURE WILL RESULT IN A NEGATIVE REWARD.
 
