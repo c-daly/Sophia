@@ -238,3 +238,46 @@ SUMMARY_PROMPT = """
         summarizing. Please omit any mention of the user's confirmation at the end. It's sufficient to summarize the 
         conversation up to the point of the user's confirmation.
 """
+
+KG_PROMPT = """
+Translate the following descriptive text into a valid Cypher query that models the information using Neo4j. The description is based on schema.org standards, so please identify relevant schema.org types and properties to structure the data accurately within the Neo4j database. Ensure to use MERGE to avoid creating duplicate nodes, SET for adding or updating properties, and properly define relationships between entities. Here's the description provided:
+
+    Guidelines:
+
+    Identify Entities: Determine the main entities described in the text and their corresponding schema.org types.
+    Extract Properties: Extract key details about these entities to use as properties in the database, aligning with schema.org properties where possible.
+    Define Relationships: Identify any relationships between entities mentioned in the text and represent these relationships in your query.
+    Use MERGE and SET Appropriately: Utilize MERGE to handle entities and relationships to ensure no duplicates are created. Use SET to add or update properties on entities and relationships based on the information provided.
+    Return Statement: Include a RETURN statement at the end of your query to display the created or updated entities.
+    Do not include any extraneous text as this query will be used directly in a Neo4J instance.
+
+    Examples:
+
+    Example 1 Input: Describe the formation of the solar system.
+    Example 1 Output: MERGE (solarSystemFormation:Event {{name: 'Formation of the Solar System'}})
+        SET solarSystemFormation.description = 'Began with the gravitational collapse of a small part of a giant molecular cloud. Most of the collapsing mass collected in the center, forming the Sun, while the rest flattened into a protoplanetary disk out of which the planets, moons, and other objects formed.'
+        MERGE (molecularCloud:Material {{name: 'Giant Molecular Cloud'}})
+        MERGE (sun:CelestialBody {{name: 'Sun'}})
+        MERGE (protoplanetaryDisk:Material {{name: 'Protoplanetary Disk'}})
+        MERGE (molecularCloud)-[:COLLAPSED_TO_FORM]->(solarSystemFormation)
+        MERGE (solarSystemFormation)-[:LED_TO_CREATION_OF]->(sun)
+        MERGE (solarSystemFormation)-[:LED_TO_CREATION_OF]->(protoplanetaryDisk)
+        RETURN solarSystemFormation, molecularCloud, sun, protoplanetaryDisk;
+
+    Example 2 Input: Describe the process of water turning into ice within the context of a physical change. Include the states of water and ice, and the process of freezing 
+    Example 2 Output:
+        MERGE (water:State {{name: 'Water', temperature: 'Above 0°C'}})
+        SET water.description = 'Liquid state of H2O, typically found at temperatures above 0°C.'
+        MERGE (ice:State {{name: 'Ice', temperature: '0°C and below'}})
+        SET ice.description = 'Solid state of H2O, formed when water freezes at 0°C.'
+        MERGE (freezing:Process {{name: 'Freezing'}})
+        SET freezing.description = 'The physical process where liquid water turns into ice when the temperature drops to 0°C or below.'
+        MERGE (water)-[:UNDERGOES]->(freezing)-[:RESULTS_IN]->(ice)
+        RETURN water, freezing, ice;
+
+IT IS ESSENTIAL THAT THE RETURNED QUERY IS IN A VALID CYPHER FORMAT THAT CAN BE EXECUTED WITHOUT ERROR IN NEO4J.
+FAILURE WILL RESULT IN A NEGATIVE REWARD.
+
+    Input Text: {user_input}
+    Output Cypher Query:
+"""
