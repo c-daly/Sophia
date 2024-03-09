@@ -134,4 +134,5 @@ def update_table(search_query, n_clicks):
     # This method should really have a lot more
     # UI related functionality, but it's just
     # not a priority right now.
-    return fetch_similar_interactions(search_query)
+    #return fetch_similar_interactions(search_query)
+    pass

@@ -8,8 +8,10 @@ services:
     depends_on:
       - mongo
       - standalone
+      - neo4j
     environment:
       - MONGO_URL=mongodb://mongo:27017/sophia  # Connecting to the MongoDB named "sophia"
+      - NEO4J_URL=bolt://neo4j:7687
       - OPENAI_API_KEY=${OPENAI_API_KEY}  # Set your OpenAI API key here
 
   neo4j:
