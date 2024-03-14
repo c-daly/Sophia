@@ -25,21 +25,7 @@ class Neo4jAgent(AbstractAgent):
         self.messages.append({"role": "system", "content": self.prompt})
         self.last_input_message = None
         self.last_response_message = None
-
-    def format_interaction_data(self):
-        interaction_data = {
-            "user_id": "12345",  # An identifier for the user
-            "timestamp": time.time(),  # timestamp of the start of interaction
-            "messages": self.messages[1:],  # A list of messages in the interaction excluding the prompt
-            "metadata": {
-                "agent_fitness_rating": ".5",
-                # A rating of how well the response answered the user's query (0-1), estimated by the agent
-                "user_fitness_rating": ".5",
-                # A rating of how well the response answered the user's query (0-1), estimated by the user
-            }
-        }
-        return interaction_data
-
+   
     def append_message(self, message, role):
         if role == "user":
             self.last_input_message = message
@@ -54,24 +40,16 @@ class Neo4jAgent(AbstractAgent):
     """
     def generate_query_sequence(self, text):
         try:
+            # Should go something like this:
+            # User input is used to extract relevant info from knowledge graph
+            # Extracted info is used to generate a response
+            # Response is returned to user
             response = None
             self.append_message(text, "user")
+
             response = StaticOpenAIModel.generate_response(self.messages)
             response_dict = response.to_dict()
             res = response_dict['choices'][0]['message']['content']
-            #try:
-            #    res_dict = json.loads(res, strict=False)
-            #    config.logger.debug(f"res_dict: {res_dict}, type: {type(res_dict)}")
-                #self.logger.debug(f"res_dict: {res_dict}, type: {type(res_dict)}")
-
-            #except Exception as e:
-            #    self.append_message(f"The following exception occurred while parsing your response: {e}. Please attempt to reformat and send again.", "user")
-            #    response = StaticOpenAIModel.generate_response(self.messages)
-            #    response_dict = response.to_dict()
-                #config.logger.debug(f"exception response_dict: {response_dict}, type: {type(response_dict)}")
-
-            #    res = response_dict['choices'][0]['message']['content']
-            #    res_dict = json.loads(res, strict=False)
             self.append_message(res, "assistant")
             
             config.logger.debug(f"res: {res}")
