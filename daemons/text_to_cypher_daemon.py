@@ -2,7 +2,21 @@ from models.static_openai_wrapper import StaticOpenAIModel
 from data.neo4j_wrapper import Neo4jWrapper
 import config
 from prompts.prompts import KG_PROMPT, KG_QUERY_PROMPT
+
+"""
+     This class is assumed to operate with a language model
+     and is responsible both for trasnlating text to cypher,
+     but also providing text summaries of query reults.
+"""
 class TextToCypherDaemon:
+
+    @staticmethod
+    def summarize_query_results(results):
+        prompt = f"Summarize the results of the query given: {results}"
+        config.logger.info(f"Generating summary for prompt: {prompt}")
+        response = StaticOpenAIModel.generate_response(messages=[{"role": "system", "content": prompt}])
+        return response['choices'][0]['message']['content']
+
     @staticmethod
     def generate_cypher(text):
         neo = Neo4jWrapper('bolt://neo4j:7687', 'neo4j', 'password')
@@ -13,6 +27,9 @@ class TextToCypherDaemon:
         initial_response = StaticOpenAIModel.generate_response(messages=[{"role": "user", "content": initial_prompt}])
         query = initial_response['choices'][0]['message']['content']
         initial_results = neo.query(query)
+
+        summary = TextToCypherDaemon.summarize_query_results(initial_results)
+        config.logger.info(f"Generated summary: {summary}")
         config.logger.info(f"Generated initial results: {initial_results}")
         # Then we can query the database for the information
         # and add that to the prompt we send to the model
