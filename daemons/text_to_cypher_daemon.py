@@ -18,23 +18,33 @@ class TextToCypherDaemon:
         return response['choices'][0]['message']['content']
 
     @staticmethod
+    def get_query_relevant_info(query):
+        neo = Neo4jWrapper('bolt://neo4j:7687', 'neo4j', 'password')
+        prompt = KG_QUERY_PROMPT.format(topic=query)
+        response = StaticOpenAIModel.generate_response(messages=[{"role": "system", "content": prompt}])
+        query = response['choices'][0]['message']['content']
+        results = neo.query(query)
+        return results
+
+    @staticmethod
     def generate_cypher(text):
         #neo = Neo4jWrapper('bolt://neo4j:7687', 'neo4j', 'password')
         # First we need to ask the model for a good query
         # to determine what we already know about the topic
-        initial_prompt = KG_QUERY_PROMPT.format(topic=text)
-        config.logger.info(f"Generating initial response for prompt: {initial_prompt}")
-        initial_response = StaticOpenAIModel.generate_response(messages=[{"role": "user", "content": initial_prompt}])
-        query = initial_response['choices'][0]['message']['content']
+        #initial_prompt = KG_QUERY_PROMPT.format(topic=text)
+        #config.logger.info(f"Generating initial response for prompt: {initial_prompt}")
+        #initial_response = StaticOpenAIModel.generate_response(messages=[{"role": "user", "content": initial_prompt}])
+        #query = initial_response['choices'][0]['message']['content']
         #initial_results = neo.query(query)
-        initial_results = None
+        initial_results = TextToCypherDaemon.get_query_relevant_info(text)
+
         summary = TextToCypherDaemon.summarize_query_results(initial_results)
         config.logger.info(f"Generated summary: {summary}")
         config.logger.info(f"Generated initial results: {initial_results}")
         # Then we can query the database for the information
         # and add that to the prompt we send to the model
         # to get the final query
-        prompt = KG_PROMPT.format(user_input=text, existing_data=initial_results)
+        prompt = KG_PROMPT.format(user_input=text, existing_data=summary)
         config.logger.info(f"Generating Cypher query for text: {prompt}")
         try:
             response = StaticOpenAIModel.generate_response(messages=[{"role": "user", "content": prompt}])
