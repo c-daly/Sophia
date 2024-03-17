@@ -5,9 +5,8 @@ from daemons.text_to_cypher_daemon import TextToCypherDaemon
 
 class KGMemory:
     def __init__(self):
-        neo_url = "bolt://localhost:7687"
+        neo_url = "bolt://neo4j:7687"
         self.neo = Neo4jWrapper(neo_url, user="neo4j", password="password")
-        pass
 
     def record(self, text):
         cypher_query = TextToCypherDaemon.generate_cypher(text)
