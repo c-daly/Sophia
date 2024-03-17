@@ -6,6 +6,7 @@ import json
 import time
 from data.milvus_wrapper import MilvusWrapper
 from data.neo4j_wrapper import Neo4jWrapper
+from memory.kg_memory import KGMemory
 from prompts.prompts import DEFAULT_PROMPT, SUMMARY_PROMPT
 import os
 
@@ -16,8 +17,8 @@ class Neo4jAgent(AbstractAgent):
     def __init__(self):
         # Initialize tools and memory
         #neo_url = os.environ.get('NEO4J_URI')
-        neo_url = 'bolt://neo4j:7687'
-        self.neo = Neo4jWrapper(uri=neo_url, user='neo4j', password='password')
+        #neo_url = 'bolt://neo4j:7687'
+        #self.neo = Neo4jWrapper(uri=neo_url, user='neo4j', password='password')
         self.logger = config.logger
         self.messages = []
         self.prompt = "Your name is Sophia and you are an extremely knowledgable and capable assistant"
@@ -25,6 +26,7 @@ class Neo4jAgent(AbstractAgent):
         self.messages.append({"role": "system", "content": self.prompt})
         self.last_input_message = None
         self.last_response_message = None
+        self.memory = KGMemory()
    
     def append_message(self, message, role):
         if role == "user":
@@ -53,8 +55,9 @@ class Neo4jAgent(AbstractAgent):
             self.append_message(res, "assistant")
             
             config.logger.debug(f"res: {res}")
-            cypher_query = TextToCypherDaemon.generate_cypher(res)
-            self.neo.query(cypher_query)
+            #cypher_query = TextToCypherDaemon.generate_cypher(res)
+            #self.neo.query(cypher_query)
+            self.memory.record(res)
             #log_message = f"User query: {text}, Cypher query: {cypher_query}, Response: {response}"
             return res
 
