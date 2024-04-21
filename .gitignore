@@ -3,8 +3,14 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+*.swp
 # C extensions
 *.so
+
+# node/npm
+node_modules/
+package-lock.json
+package.json
 
 # Distribution / packaging
 .Python

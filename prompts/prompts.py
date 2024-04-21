@@ -1,167 +1,4 @@
 # prompts.py
-MAIN_AGENT_PROMPT = "You are an assistant. Help the user by answering their questions. Use your knowledge and any tools at your disposal.{conversation_history}"
-TOOL_SELECTOR_PROMPT = "Based on the following input, select the most appropriate tool to assist: {input}"
-FEEDBACK_AGENT_PROMPT = "Evaluate this: Question is {query}. Answer provided is {response}. Was this a satisfactory answer? Only say 'yes' or 'no'."
-REACT_AGENT_PROMPT = """
-    You run in a loop of Thought, Action, PAUSE, Observation.
-    At the end of the loop you output an Answer
-    Use Thought to describe your thoughts about the question you have been asked.
-    Use Action to run one of the actions available to you - then return PAUSE.
-    Observation will be the result of running those actions.
-
-    Your available actions are:
-
-    calculate:
-    e.g. calculate: 4 * 7 / 3
-    Runs a calculation and returns the number - uses Python so be sure to use floating point syntax if necessary
-
-    wikipedia:
-    e.g. wikipedia: Django
-    Returns a summary from searching Wikipedia
-
-   
-    Always look things up on Wikipedia if you have the opportunity to do so.
-
-    Example session:
-
-    Question: What is the capital of France?
-    Thought: I should look up France on Wikipedia
-    Action: wikipedia: France
-    PAUSE
-
-    You will be called again with this:
-
-    Observation: France is a country. The capital is Paris.
-    
-    You then output:
-    The answer is: Paris
-    """.strip()
-REACT_AGENT_PROMPT2 = """
-
-    Your available actions are:
-
-        calculate:
-            e.g. calculate: 4 * 7 / 3
-            Runs a calculation and returns the number - uses Python so be sure to use floating point syntax if necessary
-
-        wikipedia:
-            e.g. wikipedia: Django
-            Returns a summary from searching Wikipedia
-        
-        finish:
-            returns the response to the user
-Question: What is the elevation range for the area that the eastern sector of the
-Colorado orogeny extends into?
-Thought 1: I need to search Colorado orogeny, find the area that the eastern sector
-of the Colorado orogeny extends into, then find the elevation range of the
-area.
-Action 1: Search[Colorado orogeny]
-Observation 1: The Colorado orogeny was an episode of mountain building (an orogeny) in
-Colorado and surrounding areas.
-Thought 2: It does not mention the eastern sector. So I need to look up eastern
-sector.
-Action 2: Lookup[eastern sector]
-Observation 2: (Result 1 / 1) The eastern sector extends into the High Plains and is called
-the Central Plains orogeny.
-Thought 3: The eastern sector of Colorado orogeny extends into the High Plains. So I
-need to search High Plains and find its elevation range.
-Action 3: Search[High Plains]
-Observation 3: High Plains refers to one of two distinct land regions
-Thought 4: I need to instead search High Plains (United States).
-Action 4: Search[High Plains (United States)]
-Observation 4: The High Plains are a subregion of the Great Plains. From east to west, the
-High Plains rise in elevation from around 1,800 to 7,000 ft (550 to 2,130
-m).[3]
-Thought 5: High Plains rise in elevation from around 1,800 to 7,000 ft, so the answer
-is 1,800 to 7,000 ft.
-Action 5: Finish[1,800 to 7,000 ft]
-
-Question: Musician and satirist Allie Goertz wrote a song about the "The Simpsons"
-character Milhouse, who Matt Groening named after who?
-Thought 1: The question simplifies to "The Simpsons" character Milhouse is named after
-who. I only need to search Milhouse and find who it is named after.
-Action 1: Search[Milhouse]
-Observation 1: Milhouse Mussolini Van Houten is a recurring character in the Fox animated
-television series The Simpsons voiced by Pamela Hayden and created by Matt
-Groening.
-Thought 2: The paragraph does not tell who Milhouse is named after, maybe I can look up
-"named after".
-Action 2: Lookup[named after]
-Observation 2: (Result 1 / 1) Milhouse was named after U.S. president Richard Nixon, whose
-middle name was Milhous.
-Thought 3: Milhouse was named after U.S. president Richard Nixon, so the answer is
-Richard Nixon.
-Action 3: Finish[Richard Nixon]
-
-Question: Which documentary is about Finnish rock groups, Adam Clayton Powell or The
-Saimaa Gesture?
-Thought 1: I need to search Adam Clayton Powell and The Saimaa Gesture, and find which
-documentary is about Finnish rock groups.
-Action 1: Search[Adam Clayton Powell]
-Observation 1 Could not find [Adam Clayton Powell]. Similar: [’Adam Clayton Powell
-III’, ’Seventh Avenue (Manhattan)’, ’Adam Clayton Powell Jr. State Office
-Building’, ’Isabel Washington Powell’, ’Adam Powell’, ’Adam Clayton Powell
-(film)’, ’Giancarlo Esposito’].
-Thought 2: To find the documentary, I can search Adam Clayton Powell (film).
-Action 2: Search[Adam Clayton Powell (film)]
-Observation 2: Adam Clayton Powell is a 1989 American documentary film directed by
-Richard Kilberg. The film is about the rise and fall of influential
-African-American politician Adam Clayton Powell Jr.[3][4] It was later aired
-as part of the PBS series The American Experience.
-Thought 3: Adam Clayton Powell (film) is a documentary about an African-American
-politician, not Finnish rock groups. So the documentary about Finnish rock
-groups must instead be The Saimaa Gesture.
-Action 3: Finish[The Saimaa Gesture]
-
-Question: What profession does Nicholas Ray and Elia Kazan have in common?
-Thought 1: I need to search Nicholas Ray and Elia Kazan, find their professions, then
-find the profession they have in common.
-Action 1: Search[Nicholas Ray]
-Observation 1: Nicholas Ray (born Raymond Nicholas Kienzle Jr., August 7, 1911 - June 16,
-1979) was an American film director, screenwriter, and actor best known for
-the 1955 film Rebel Without a Cause.
-Thought 2: Professions of Nicholas Ray are director, screenwriter, and actor. I need
-to search Elia Kazan next and find his professions.
-Action 2: Search[Elia Kazan]
-Observation 2: Elia Kazan was an American film and theatre director, producer, screenwriter
-and actor.
-Thought 3: Professions of Elia Kazan are director, producer, screenwriter, and actor.
-So profession Nicholas Ray and Elia Kazan have in common is director,
-screenwriter, and actor.
-Action 3: Finish[director, screenwriter, actor]
-
-Question: Which magazine was started first Arthur’s Magazine or First for Women?
-Thought 1: I need to search Arthur’s Magazine and First for Women, and find which was
-started first.
-Action 1: Search[Arthur’s Magazine]
-Observation 1: Arthur’s Magazine (1844-1846) was an American literary periodical published
-in Philadelphia in the 19th century.
-Thought 2: Arthur’s Magazine was started in 1844. I need to search First for Women
-next.
-Action 2: Search[First for Women]
-Observation 2: First for Women is a woman’s magazine published by Bauer Media Group in the
-USA.[1] The magazine was started in 1989.
-Thought 3: First for Women was started in 1989. 1844 (Arthur’s Magazine) < 1989 (First
-for Women), so Arthur’s Magazine was started first.
-Action 3: Finish[Arthur’s Magazine]
-
-Question: Were Pavel Urysohn and Leonid Levin known for the same type of work?
-Thought 1: I need to search Pavel Urysohn and Leonid Levin, find their types of work,
-then find if they are the same.
-Action 1: Search[Pavel Urysohn]
-Observation 1: Pavel Samuilovich Urysohn (February 3, 1898 - August 17, 1924) was a Soviet
-mathematician who is best known for his contributions in dimension theory.
-Thought 2: Pavel Urysohn is a mathematician. I need to search Leonid Levin next and
-find its type of work.
-Action 2: Search[Leonid Levin]
-Observation 2: Leonid Anatolievich Levin is a Soviet-American mathematician and computer
-scientist.
-Thought 3: Leonid Levin is a mathematician and computer scientist. So Pavel Urysohn
-and Leonid Levin have the same type of work.
-Action 3: Finish[yes]
-Question:  
-
-"""
 DEFAULT_PROMPT = """                        
                         Instruction to Agent:
                         Your name is Sophia and you are a highly intelligent assistant capable of understanding the intent of your user. 
@@ -233,8 +70,115 @@ DEFAULT_PROMPT = """
                         the response is properly formatted. 
  
 """
+
 SUMMARY_PROMPT = """
         Please summarize the preceding conversation. Please don't neglect to include the factual content when 
         summarizing. Please omit any mention of the user's confirmation at the end. It's sufficient to summarize the 
         conversation up to the point of the user's confirmation.
+"""
+
+KG_QUERY_PROMPT = """
+Generate a Cypher query to retrieve entities and their relationships from the knowledge graph related to the topic of interest. The query should identify nodes and edges that are directly and indirectly associated with this topic, providing a comprehensive overview of the existing data landscape. This will inform the integration of new information related to the topic, ensuring relevance and preventing duplication. Consider including entities of various types and their connections that could be pertinent.
+
+You must account for routine differences in the text, such as capitalization and pluralization, to ensure the query is robust and can handle variations in the input data.
+Example:
+    Topic of interest: derivatives
+    Output: 
+        MATCH (n)-[r]-(m)
+        WHERE toLower(n.name) CONTAINS 'derivatives'
+        RETURN n, r, m
+Your reply must be a valid Cypher query that can be executed in a Neo4j instance. Include no extraneous text. Failure to provide a valid query will result in a negative reward.
+Topic of Interest: {topic}
+"""
+
+KG_PROMPT = """
+Translate the following descriptive text into a valid Cypher query that models the information using Neo4j. The description is based on schema.org standards, so please identify relevant schema.org types and properties to structure the data accurately within the Neo4j database. Ensure to use MERGE to avoid creating duplicate nodes, SET for adding or updating properties, and properly define relationships between entities. Here's the description provided:
+
+    Guidelines:
+
+    Identify Entities: Determine the main entities described in the text and their corresponding schema.org types.
+    Extract Properties: Extract key details about these entities to use as properties in the database, aligning with schema.org properties where possible.
+    Define Relationships: Identify any relationships between entities mentioned in the text and represent these relationships in your query.
+    Use MERGE and SET Appropriately: Utilize MERGE to handle entities and relationships to ensure no duplicates are created. Use SET to add or update properties on entities and relationships based on the information provided.
+    Return Statement: Include a RETURN statement at the end of your query to display the created or updated entities.
+    Do not include any extraneous text as this query will be used directly in a Neo4J instance.
+
+    Examples:
+
+    Example 1 Input: Describe the formation of the solar system.
+    Example 1 Output: MERGE (solarSystemFormation:Event {{name: 'Formation of the Solar System'}})
+        SET solarSystemFormation.description = 'Began with the gravitational collapse of a small part of a giant molecular cloud. Most of the collapsing mass collected in the center, forming the Sun, while the rest flattened into a protoplanetary disk out of which the planets, moons, and other objects formed.'
+        MERGE (molecularCloud:Material {{name: 'Giant Molecular Cloud'}})
+        MERGE (sun:CelestialBody {{name: 'Sun'}})
+        MERGE (protoplanetaryDisk:Material {{name: 'Protoplanetary Disk'}})
+        MERGE (molecularCloud)-[:COLLAPSED_TO_FORM]->(solarSystemFormation)
+        MERGE (solarSystemFormation)-[:LED_TO_CREATION_OF]->(sun)
+        MERGE (solarSystemFormation)-[:LED_TO_CREATION_OF]->(protoplanetaryDisk)
+        RETURN solarSystemFormation, molecularCloud, sun, protoplanetaryDisk;
+
+    Example 2 Input: Describe the process of water turning into ice within the context of a physical change. Include the states of water and ice, and the process of freezing 
+    Example 2 Output:
+        MERGE (water:State {{name: 'Water', temperature: 'Above 0°C'}})
+        SET water.description = 'Liquid state of H2O, typically found at temperatures above 0°C.'
+        MERGE (ice:State {{name: 'Ice', temperature: '0°C and below'}})
+        SET ice.description = 'Solid state of H2O, formed when water freezes at 0°C.'
+        MERGE (freezing:Process {{name: 'Freezing'}})
+        SET freezing.description = 'The physical process where liquid water turns into ice when the temperature drops to 0°C or below.'
+        MERGE (water)-[:UNDERGOES]->(freezing)-[:RESULTS_IN]->(ice)
+        RETURN water, freezing, ice;
+
+EXISTING DATA: 
+    {existing_data}
+IT IS ESSENTIAL THAT ALL SPECIAL CHARACTERS ARE ESCAPED IN THE RETURNED QUERY.
+IT IS ESSENTIAL THAT THE RETURNED QUERY IS IN A VALID CYPHER FORMAT THAT CAN BE EXECUTED WITHOUT ERROR IN NEO4J.
+FAILURE WILL RESULT IN A NEGATIVE REWARD.
+
+    Input Text: {user_input}
+    Output Cypher Query:
+"""
+
+KG_PROMPT2 = """
+Translate the following descriptive text into a valid Cypher query that models the information using Neo4j. The description is based on schema.org standards, so please identify relevant schema.org types and properties to structure the data accurately within the Neo4j database. Ensure to use MERGE to avoid creating duplicate nodes, SET for adding or updating properties, and properly define relationships between entities. Here's the description provided:
+
+    Guidelines:
+
+    Identify Entities: Determine the main entities described in the text and their corresponding schema.org types.
+    Extract Properties: Extract key details about these entities to use as properties in the database, aligning with schema.org properties where possible.
+    Define Relationships: Identify any relationships between entities mentioned in the text and represent these relationships in your query.
+    Use MERGE and SET Appropriately: Utilize MERGE to handle entities and relationships to ensure no duplicates are created. Use SET to add or update properties on entities and relationships based on the information provided.
+    Return Statement: Include a RETURN statement at the end of your query to display the created or updated entities.
+    Do not include any extraneous text as this query will be used directly in a Neo4J instance.
+
+    Examples:
+
+    Example 1 Input: Describe the formation of the solar system.
+    Example 1 Output: MERGE (solarSystemFormation:Event {{name: 'Formation of the Solar System'}})
+        SET solarSystemFormation.description = 'Began with the gravitational collapse of a small part of a giant molecular cloud. Most of the collapsing mass collected in the center, forming the Sun, while the rest flattened into a protoplanetary disk out of which the planets, moons, and other objects formed.'
+        MERGE (molecularCloud:Material {{name: 'Giant Molecular Cloud'}})
+        MERGE (sun:CelestialBody {{name: 'Sun'}})
+        MERGE (protoplanetaryDisk:Material {{name: 'Protoplanetary Disk'}})
+        MERGE (molecularCloud)-[:COLLAPSED_TO_FORM]->(solarSystemFormation)
+        MERGE (solarSystemFormation)-[:LED_TO_CREATION_OF]->(sun)
+        MERGE (solarSystemFormation)-[:LED_TO_CREATION_OF]->(protoplanetaryDisk)
+        RETURN solarSystemFormation, molecularCloud, sun, protoplanetaryDisk;
+
+    Example 2 Input: Describe the process of water turning into ice within the context of a physical change. Include the states of water and ice, and the process of freezing 
+    Example 2 Output:
+        MERGE (water:State {{name: 'Water', temperature: 'Above 0°C'}})
+        SET water.description = 'Liquid state of H2O, typically found at temperatures above 0°C.'
+        MERGE (ice:State {{name: 'Ice', temperature: '0°C and below'}})
+        SET ice.description = 'Solid state of H2O, formed when water freezes at 0°C.'
+        MERGE (freezing:Process {{name: 'Freezing'}})
+        SET freezing.description = 'The physical process where liquid water turns into ice when the temperature drops to 0°C or below.'
+        MERGE (water)-[:UNDERGOES]->(freezing)-[:RESULTS_IN]->(ice)
+        RETURN water, freezing, ice;
+
+EXISTING DATA: 
+    {existing_data}
+IT IS ESSENTIAL THAT ALL SPECIAL CHARACTERS ARE ESCAPED IN THE RETURNED QUERY.
+IT IS ESSENTIAL THAT THE RETURNED QUERY IS IN A VALID CYPHER FORMAT THAT CAN BE EXECUTED WITHOUT ERROR IN NEO4J.
+FAILURE WILL RESULT IN A NEGATIVE REWARD.
+
+    Input Text: {user_input}
+    Output Cypher Query:
 """
