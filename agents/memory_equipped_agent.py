@@ -13,10 +13,11 @@ class MemoryEquippedAgent(BasicAgent):
 
     def generate_query_sequence(self, text):
         response = super().generate_query_sequence(text)
-        response_content = response.get("content")
-        message = super().format_message(response)
-        self.memory_store.record(message)
+        response_dict = response.to_dict()
+        response_content = response_dict['choices'][0]['message']['content']
         config.logger.debug(f"response_content: {response_content}")
+        message = super().format_query_response_pair(response_content)
+        self.memory_store.record(message)
 
 
 

@@ -8,12 +8,9 @@ class BasicAgent(AbstractAgent):
         # Initialize tools and memory
         self.messages = []
 
-    def format_message(self, response):
-        input_message = f"User: {self.text}"
-        output_message = f"Assistant: {response}"
+    def format_query_response_pair(self, response):
         human_score = 0.5
-
-        return {"input_message": input_message, "output_message": output_message, "human_score": human_score}
+        return {"input_message": self.text, "output_message": response, "human_score": human_score}
 
     def append_message(self, message, role):
         self.messages.append({"role": role, "content": message})
