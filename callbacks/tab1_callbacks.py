@@ -19,11 +19,11 @@ def update_output(n_clicks, input_value):
     if n_clicks and input_value:
         response = app.model.generate_query_sequence(input_value)
         #config.logger.debug("generate returned")
-        response_content = markdown.markdown(response)
+        response_content = response
         #config.logger.debug(f"response_content: {response_content}, type: {type(response_content)}")
         # Format messages for display
         formatted_messages = '\n'.join([f"[{msg['role'].capitalize()}]: {msg['content']}\n" for msg in app.model.messages[1:]])
 
-        return formatted_messages, '', app.model.last_input_message, response
+        return formatted_messages, '', input_value, response
     return '', '','', ''
 

@@ -7,23 +7,21 @@ class BasicAgent(AbstractAgent):
     def __init__(self):
         # Initialize tools and memory
         self.messages = []
-        self.prompt = ""
-        self.last_input_message = None
-        self.last_response_message = None
+
+    def format_message(self, response):
+        input_message = f"User: {self.text}"
+        output_message = f"Assistant: {response}"
+        human_score = 0.5
+
+        return {"input_message": input_message, "output_message": output_message, "human_score": human_score}
 
     def append_message(self, message, role):
-        # if len(self.messages) == 0:
-        # self.messages.append({"role": "system", "content": self.prompt})
-        if role == "user":
-            self.last_input_message = message
-        elif role == "assistant":
-            self.last_response_message = message
         self.messages.append({"role": role, "content": message})
 
     def generate_query_sequence(self, text):
         try:
             response = None
-
+            self.text = text
             self.append_message(text, "user")
             response = StaticOpenAIModel.generate_response(self.messages)
             response_text = response.choices[0].message['content'].strip()

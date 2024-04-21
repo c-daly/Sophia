@@ -1,7 +1,7 @@
 # index.py
 import dash
 from dash import html
-from agents.neo4j_agent import Neo4jAgent
+from agents.memory_equipped_agent import MemoryEquippedAgent
 from app import app
 from templates import master
 from callbacks.tab1_callbacks import *
@@ -27,7 +27,7 @@ modal = dbc.Modal(
     id="response-modal",
 )
 
-app.model = Neo4jAgent()
+app.model = MemoryEquippedAgent()
 app.layout = dash.html.Div([
     # Master layout components (like header, footer, etc.)
     master.header_component,

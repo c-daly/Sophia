@@ -21,7 +21,8 @@ services:
       - "7474:7474"
       - "7687:7687"
     volumes:
-      - sophiadata:/data/neo4j
+      - neo4j:/data/neo4j
+      #- ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/neo4j:/neo4j_data
     environment:
       - NEO4J_AUTH=neo4j/password
   mongo:
@@ -29,7 +30,8 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - sophiadata:/data/db
+      - mongo:/data/db
+        #- ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/mongo:/mongo_data
     environment:
       - MONGO_INITDB_DATABASE=sophia  # Initial database named "sophia"
 
@@ -42,7 +44,8 @@ services:
       - ETCD_QUOTA_BACKEND_BYTES=4294967296
       - ETCD_SNAPSHOT_COUNT=50000
     volumes:
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/etcd:/etcd
+      - milvus:/data/milvus-etcd
+      #- ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/etcd:/etcd
     command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
     healthcheck:
       test: [ "CMD", "etcdctl", "endpoint", "health" ]
@@ -60,7 +63,8 @@ services:
       - "9001:9001"
       - "9000:9000"
     volumes:
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/minio:/minio_data
+      - milvus:/data/milvus-minio
+        #- ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/minio:/minio_data
     command: minio server /minio_data --console-address ":9001"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
@@ -76,7 +80,8 @@ services:
       ETCD_ENDPOINTS: etcd:2379
       MINIO_ADDRESS: minio:9000
     volumes:
-      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/milvus:/var/lib/milvus
+      - milvus:/data/milvus_standalone
+      #- ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/milvus:/var/lib/milvus
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9091/healthz" ]
       interval: 30s
@@ -91,7 +96,9 @@ services:
       - "minio"
 
 volumes:
-  sophiadata:
+  mongo:
+  neo4j:
+  milvus:
 
 
 

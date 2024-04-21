@@ -23,15 +23,9 @@ class CommandAgent(AbstractAgent):
 
     def format_interaction_data(self):
         interaction_data = {
-            "user_id": "12345",  # An identifier for the user
             "timestamp": time.time(),  # timestamp of the start of interaction
-            "messages": self.messages[1:],  # A list of messages in the interaction excluding the prompt
-            "metadata": {
-                "agent_fitness_rating": ".5",
-                # A rating of how well the response answered the user's query (0-1), estimated by the agent
-                "user_fitness_rating": ".5",
-                # A rating of how well the response answered the user's query (0-1), estimated by the user
-            }
+            "prompt": self.last_input_message,  # user input
+            "response": self.last_response_message,  # assistant response
         }
         return interaction_data
 
