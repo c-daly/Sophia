@@ -1,11 +1,12 @@
 from agents.basic_agent import BasicAgent
 from memory.standard_memory import StandardMemoryStore
+from memory.standard_memory_with_embeddings import StandardMemoryWithEmbeddings
 import config
 
 class MemoryEquippedAgent(BasicAgent):
     def __init__(self, memory_store=None):
         if not memory_store:
-            self.memory_store = StandardMemoryStore()
+            self.memory_store = StandardMemoryWithEmbeddings()
         else:
             self.memory_store = memory_store
 
