@@ -21,7 +21,7 @@ class MongoWrapper:
         for doc in data_list:
             # Convert ObjectID to string
             doc["_id"] = str(doc["_id"])
-            doc['query'] = doc['messages'][0]['content']
+            #doc['query'] = doc['messages'][0]['content']
             #config.logger.debug(f"doc['query']: {doc['query']}")
             #doc['view_response'] = 'VIEW'
             # Flatten metadata

@@ -109,14 +109,14 @@ def fetch_similar_interactions(search_query):
         joined_data = []
         for milvus_id, distance in zip(ids, distances):
             mongo_doc = mongo_docs_map.get(ObjectId(milvus_id))
-            if mongo_doc:
-                formatted_doc = {
-                    "_id": str(mongo_doc['_id']),
-                    "query": mongo_doc.get("query", ""),
-                    "distance": distance,
-                    "messages": mongo_doc.get("messages", "")
-                }
-                joined_data.append(formatted_doc)
+            #if mongo_doc:
+            #    formatted_doc = {
+            #        "_id": str(mongo_doc['_id']),
+            #        "query": mongo_doc.get("query", ""),
+            #        "distance": distance,
+            #        "messages": mongo_doc.get("messages", "")
+            #    }
+            joined_data.append(mongo_doc)
         # Sort by distance
         joined_data.sort(key=lambda x: x['distance'])
         data = joined_data
@@ -134,5 +134,5 @@ def update_table(search_query, n_clicks):
     # This method should really have a lot more
     # UI related functionality, but it's just
     # not a priority right now.
-    #return fetch_similar_interactions(search_query)
-    pass
+    return fetch_similar_interactions(search_query)
+    #pass

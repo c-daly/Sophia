@@ -4,12 +4,12 @@ from dash.dash_table import DataTable
 columns = [
     {"name": "ID", "id": "_id"},
     #{"name": "Timestamp", "id": "timestamp"},
-    {"name": "Query", "id": "query"},
+    #{"name": "Query", "id": "query"},
     #{"name": "Response", "id": "response"},
     #{"name": "messages", "id": "messages"},
     #{"name": "human fitness rating", "id": "user_fitness_rating"},
     #{"name": "agent fitness rating", "id": "agent_fitness_rating"},
-    {"name": "Distance", "id": "distance"},
+    #{"name": "Distance", "id": "distance"},
 ]
 
 layout = html.Div([
