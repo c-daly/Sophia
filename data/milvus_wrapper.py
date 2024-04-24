@@ -54,7 +54,7 @@ class MilvusWrapper:
 
         try:
             result = self.collection.insert([record])
-            config.logger.debug(f"Insert result: {result}")
+            #config.logger.debug(f"Insert result: {result}")
             return result
         except Exception as e:
             config.logger.debug(f"Milvus exception: {e}")
