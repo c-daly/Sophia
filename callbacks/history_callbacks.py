@@ -116,7 +116,7 @@ def fetch_similar_interactions(search_query):
                     "_id": str(mongo_doc['_id']),
                     "query": mongo_doc.get("query", ""),
                     "distance": distance,
-                    "messages": mongo_doc.get("messages", "")
+                    #"messages": mongo_doc.get("messages", "")
                 }
             joined_data.append(mongo_doc)
         # Sort by distance

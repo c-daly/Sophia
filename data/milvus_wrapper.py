@@ -68,13 +68,15 @@ class MilvusWrapper:
         if not self.connected:
             self.make_connection()
         #collection_name = "sophia_embeddings"
+        #config.logger.debug(f"Searching for similar vectors to query vector: {query_vector}")
         try:
             # Search for similar vectors in the collection
-            search_params = {"metric_type": "L2", "params": {"nprobe": 10}}
-            results = self.collection.search([query_vector], "embeddings", param=search_params, limit=top_k) #, index_param=index_param)
+            search_params = {"metric_type": "COSINE", "params": {}}
+            results = self.collection.search([query_vector], "embeddings", search_params=search_params) #, index_param=index_param)
+            config.logger.debug(f"Search results: {results}")
+            return results
         except Exception as e:
             print(f"Milvus search exception: {e}")
-        return results
 
     def delete_vectors(self, collection_name, ids):
         if not self.connected:
