@@ -17,8 +17,9 @@ class MilvusWrapper:
             self.collection = Collection(self.collection_name)
         self.collection.load()
         self.connected = True
-
+        config.logger.debug(f"collection description: {self.collection.num_entities}")
     def create_collection(self, dimension=1536):
+        config.logger.debug(f"Creating collection {self.collection_name}")
         #if not self.connected:
         #    self.make_connection()
         if not utility.has_collection(self.collection_name):
@@ -54,6 +55,7 @@ class MilvusWrapper:
 
         try:
             result = self.collection.insert([record])
+            self.collection.flush()
             #config.logger.debug(f"Insert result: {result}")
             return result
         except Exception as e:
@@ -71,8 +73,9 @@ class MilvusWrapper:
         #config.logger.debug(f"Searching for similar vectors to query vector: {query_vector}")
         try:
             # Search for similar vectors in the collection
-            search_params = {"metric_type": "COSINE", "params": {}}
-            results = self.collection.search([query_vector], "embeddings", search_params=search_params) #, index_param=index_param)
+            search_params = {"metric_type": "L2", "params": {"nprobe": 16}}
+            results = self.collection.search(data=[query_vector], anns_field="embeddings", param=search_params, limit=10) #, index_param=index_param)
+            #results = self.collection.search("sophia", 10, [query_vector])
             config.logger.debug(f"Search results: {results}")
             return results
         except Exception as e:
