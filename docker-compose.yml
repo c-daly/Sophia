@@ -4,15 +4,15 @@ services:
   sophia:
     build: .
     ports:
-      - "8050:8050"  # Map the port of your Sophia app if needed. Adjust as necessary.
+      - "8050:8050"
     depends_on:
       - mongo
       - standalone
       - neo4j
     environment:
-      - MONGO_URL=mongodb://mongo:27017/sophia  # Connecting to the MongoDB named "sophia"
+      - MONGO_URL=mongodb://mongo:27017/sophia
       - NEO4J_URL=bolt://neo4j:7687
-      - OPENAI_API_KEY=${OPENAI_API_KEY}  # Set your OpenAI API key here
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
 
   neo4j:
     image: neo4j:latest
@@ -22,7 +22,6 @@ services:
       - "7687:7687"
     volumes:
       - neo4j:/data/neo4j
-      #- ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/neo4j:/neo4j_data
     environment:
       - NEO4J_AUTH=neo4j/password
   mongo:
@@ -30,10 +29,9 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      #- mongo:/data/db
       - mongo:/data/db
     environment:
-      - MONGO_INITDB_DATABASE=sophia  # Initial database named "sophia"
+      - MONGO_INITDB_DATABASE=sophia
   etcd:
     container_name: milvus-etcd
     image: quay.io/coreos/etcd:v3.5.5
