@@ -77,14 +77,10 @@ def toggle_modal(active_cell, close_clicks, next_clicks, prev_clicks, table_data
         return True, "Something went wrong"
 
 
-def format_mongo_doc(doc, distance):
-    config.logger.debug(f"doc ID: {doc['_id']}")
-    new_doc = {'_id': doc['_id'], 'query': doc['messages'][0]['content']}
-    config.logger.debug(f"doc['messages']: {doc['messages']}")
-    new_doc['messages'] = doc['messages']
-    new_doc['distance'] = distance
-    config.logger.debug(f"Messages: {new_doc['messages']}")
-    return new_doc
+#def format_mongo_doc(doc, distance):
+#    new_doc = {'_id': doc['_id'], 'input_message': doc['input_message'], 'output_message': doc['output_message'], 'distance': distance}
+#    config.logger.debug(f"New doc: {new_doc}")
+#    return new_doc
 
 
 def fetch_similar_interactions(search_query):
@@ -116,6 +112,7 @@ def fetch_similar_interactions(search_query):
                 formatted_doc = {
                     "_id": str(mongo_doc['_id']),
                     "input_message": mongo_doc.get("input_message", ""),
+                    "output_message": mongo_doc.get("output_message", ""),
                     "distance": distance,
                     #"messages": mongo_doc.get("input_message", "")
                 }
