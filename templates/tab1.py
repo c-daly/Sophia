@@ -21,8 +21,7 @@ layout = html.Div([
             html.Div([
 
                 html.Label('Last Incoming Response:'),
-                # dcc.Textarea(id='last-response', style={'width': '100%', 'height': '200px'}),
-                dcc.Markdown(id='last-response', mathjax=True, style={'width': '100%'}, dangerously_allow_html=True),
+                #dcc.Markdown(id='last-response', mathjax=True, style={'width': '100%'}, dangerously_allow_html=True),
             ], style={'width': '50%', 'float': 'left'}),
             html.Div([
                 html.Div([

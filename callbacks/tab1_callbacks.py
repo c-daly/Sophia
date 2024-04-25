@@ -10,7 +10,7 @@ import markdown
     [Output('output-area', 'value'),
      Output('input-box', 'value'),
      Output('last-request', 'value'),
-     Output('last-response', 'children')],
+     Output('last-response', 'value')],
     [Input('submit-button', 'n_clicks')],
     [State('input-box', 'value')]
 )
@@ -22,8 +22,8 @@ def update_output(n_clicks, input_value):
         response_content = response
         #config.logger.debug(f"response_content: {response_content}, type: {type(response_content)}")
         # Format messages for display
-        formatted_messages = '\n'.join([f"[{msg['role'].capitalize()}]: {msg['content']}\n" for msg in app.model.messages[1:]])
+        formatted_messages = '\n'.join([f"[{msg['role'].capitalize()}]: {msg['content']}\n" for msg in app.model.messages])
 
-        return formatted_messages, '', input_value, response
+        return formatted_messages, '', input_value, formatted_messages[-1]
     return '', '','', ''
 
