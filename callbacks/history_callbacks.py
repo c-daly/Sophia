@@ -112,13 +112,14 @@ def fetch_similar_interactions(search_query):
         for milvus_id, distance in zip(ids, distances):
             mongo_doc = mongo_docs_map.get(ObjectId(milvus_id))
             if mongo_doc:
+                config.logger.debug(f"Mongo doc: {mongo_doc}")
                 formatted_doc = {
                     "_id": str(mongo_doc['_id']),
-                    "query": mongo_doc.get("query", ""),
+                    "input_message": mongo_doc.get("input_message", ""),
                     "distance": distance,
-                    #"messages": mongo_doc.get("messages", "")
+                    #"messages": mongo_doc.get("input_message", "")
                 }
-            joined_data.append(mongo_doc)
+            joined_data.append(formatted_doc)
         # Sort by distance
         #joined_data.sort(key=lambda x: x['distance'])
         data = joined_data

@@ -35,7 +35,7 @@ class MilvusWrapper:
             if not collection.indexes:
                 index = {
                     "index_type": "IVF_FLAT",
-                    "metric_type": "L2",
+                    "metric_type": "COSINE",
                     "params": {"nlist": 128},
                 }
 
@@ -73,7 +73,7 @@ class MilvusWrapper:
         #config.logger.debug(f"Searching for similar vectors to query vector: {query_vector}")
         try:
             # Search for similar vectors in the collection
-            search_params = {"metric_type": "L2", "params": {"nprobe": 16}}
+            search_params = {"metric_type": "COSINE", "params": {"nprobe": 16}}
             results = self.collection.search(data=[query_vector], anns_field="embeddings", param=search_params, limit=10) #, index_param=index_param)
             #results = self.collection.search("sophia", 10, [query_vector])
             config.logger.debug(f"Search results: {results}")
