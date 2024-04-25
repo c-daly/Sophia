@@ -16,6 +16,7 @@ class StandardMemoryWithEmbeddings(AbstractMemoryStore):
     def record(self, data):
         input_text = data['input_message']
         output_text = data['output_message']
+        data['human_score'] = .5 # default value
         text = f"{input_text}\n{output_text}"
         mongo_response = self.data_store.insert_interaction(data)
         id = mongo_response.inserted_id

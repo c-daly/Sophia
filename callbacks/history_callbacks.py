@@ -11,6 +11,12 @@ import markdown
 from bson import ObjectId
 
 
+def format_row(row_data):
+    input_message = row_data.get("input_message", "")
+    output_message = row_data.get("output_message", "")
+
+    return f"QUERY: {input_message}\n\nRESPONSE: {output_message}"
+    
 @app.callback(
     Output("response-modal", "is_open"),
     Output("modal-messages", "children"),
@@ -27,43 +33,19 @@ def toggle_modal(active_cell, close_clicks, next_clicks, prev_clicks, table_data
         return False, ""
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
     if trigger_id == "history-datatable" and active_cell:
-        config.logger.debug(f"active row: {table_data[active_cell['row']]}")
-        messages = table_data[active_cell["row"]]["messages"]
-        # row_data = table_data[active_cell["row"]]
-        # return True, table_data[active_cell["row"]]["messages"]
-        """
-            Lots of refactoring required here. This branch is properly encoding
-            messages, but something about the formatting of the messages, or I
-            think displaying in a modal is making mathjax report SVG errors.
-            It may have something
-            to do with the html display attribute.
-            
-            Additionally this code is just plain messy and message encoding/decoding
-            needs to be its own thing.
-        """
-        try:
-            for message in messages:
-                formatted_message = ""
-                role = message['role']
-                if role == 'user':
-                    formatted_message = f"{message['role'].capitalize()}: {message['content']}\n"
-                elif role == 'assistant':
-                    content = json.loads(message['content'], strict=False)
-                    msg_string = content['response'] or content
-                    formatted_message = f"{message['role'].capitalize()}: {msg_string}\n"
 
-                formatted_messages.append(formatted_message)
-            return_messages = '\n'.join(formatted_messages)
-            return True, return_messages
-        except Exception as e:
-            config.logger.debug(f"Exception: {e}")
+        formatted_message = format_row(table_data[active_cell["row"]])
+
+        config.logger.debug(f"formatted_message: {formatted_message}")
+        return True, formatted_message
 
     elif trigger_id == "next-record" and active_cell:
         #    # Navigate to the next record
         next_row_index = (active_cell["row"] + 1) % len(table_data)
         messages = table_data[next_row_index]["messages"]
-        formatted_messages = '\n'.join([f"[{msg['role'].capitalize()}]: {msg['content']}\n" for msg in messages])
-        return True, markdown.markdown(formatted_messages)
+
+        formatted_message = f"QUERY: {input_message}\n\nRESPONSE: {output_message}"
+        return True, formatted_message
     elif trigger_id == "prev-record" and active_cell:
         # Navigate to the previous record
         prev_row_index = (active_cell["row"] - 1) % len(table_data)
@@ -75,12 +57,6 @@ def toggle_modal(active_cell, close_clicks, next_clicks, prev_clicks, table_data
         return False, ""
     else:
         return True, "Something went wrong"
-
-
-#def format_mongo_doc(doc, distance):
-#    new_doc = {'_id': doc['_id'], 'input_message': doc['input_message'], 'output_message': doc['output_message'], 'distance': distance}
-#    config.logger.debug(f"New doc: {new_doc}")
-#    return new_doc
 
 
 def fetch_similar_interactions(search_query):

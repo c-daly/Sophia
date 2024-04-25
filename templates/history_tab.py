@@ -4,8 +4,8 @@ from dash.dash_table import DataTable
 columns = [
     {"name": "ID", "id": "_id"},
     {"name": "Input Message", "id": "input_message"},
-    {"name": "Output Message", "id": "output_message"},
-    #{"name": "human fitness rating", "id": "user_fitness_rating"},
+    {"name": "Output Message", "id": "output_message", "hidden": True},
+    {"name": "human score", "id": "human_score"},
     #{"name": "agent fitness rating", "id": "agent_fitness_rating"},
     {"name": "Distance", "id": "distance"},
 ]
@@ -27,7 +27,7 @@ layout = html.Div([
     DataTable(
         id='history-datatable',
         columns=columns,
-
+        hidden_columns=['output_message'],
         page_size=10,  # number of rows per page
         #page_action='custom',
         #sort_action='custom',
@@ -38,10 +38,10 @@ layout = html.Div([
     ),
 
     # Data Control Area (if needed)
-    #html.Div([
-    #    html.Button("Edit", id='edit-button'),
-    #    html.Button("Delete", id='delete-button'),
-    #    html.Button("Export", id='export-button')
-    #], style={'marginTop': '10px'})
+    html.Div([
+        html.Button("Edit", id='edit-button'),
+        html.Button("Delete", id='delete-button'),
+        html.Button("Export", id='export-button')
+    ], style={'marginTop': '10px'})
 ])
 
