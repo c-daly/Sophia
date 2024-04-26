@@ -33,8 +33,6 @@ app.layout = dash.html.Div([
     master.header_component,
 
     # Main content
-
-
     master.footer_component,
     modal
 ])

@@ -14,13 +14,14 @@ import markdown
     [Input('submit-button', 'n_clicks')],
     [State('input-box', 'value')]
 )
+
 def update_output(n_clicks, input_value):
     print(f"Entering update_output with n_clicks: {n_clicks} and input_value: {input_value}")
+
     if n_clicks and input_value:
         response = app.model.generate_query_sequence(input_value)
         # Format messages for display
         formatted_messages = '\n'.join([f"[{msg['role'].capitalize()}]: {msg['content']}\n" for msg in app.model.messages])
-
         return formatted_messages, '', input_value, response
     return '', '','', ''
 

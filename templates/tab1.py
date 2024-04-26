@@ -22,8 +22,7 @@ layout = html.Div([
             html.Div([
 
                 html.Label('Last Incoming Response:'),
-                html.P(id='last-response', style={'width': '100%'}),
-                #html.Div(id='last-response'),
+                dcc.Markdown(id='last-response', mathjax=True, style={'width': '100%'}),
             ], style={'width': '50%', 'float': 'left'}),
             html.Div([
                 html.Div([

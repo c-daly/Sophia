@@ -23,5 +23,6 @@ class StandardMemoryWithEmbeddings(AbstractMemoryStore):
         embedding = StaticOpenAIModel.generate_embedding(text)
         result = self.embeddings_store.insert_vector(embedding, str(id))
         config.logger.debug(f"Inserting embedding for id: {id} result: {result}")
+
     def query(self, query):
         pass
