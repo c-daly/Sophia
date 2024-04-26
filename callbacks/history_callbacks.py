@@ -90,6 +90,7 @@ def fetch_similar_interactions(search_query):
                     "input_message": mongo_doc.get("input_message", ""),
                     "output_message": mongo_doc.get("output_message", ""),
                     "distance": distance,
+                    "human_score": mongo_doc.get("human_score", ""),
                     #"messages": mongo_doc.get("input_message", "")
                 }
             joined_data.append(formatted_doc)

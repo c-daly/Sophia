@@ -9,7 +9,8 @@ from app import app
 from data.mongo_wrapper import MongoWrapper
 from data.milvus_wrapper import MilvusWrapper
 from models.static_openai_wrapper import StaticOpenAIModel
-from dash import dcc, html
+from dash import dcc, html 
+import dash_bootstrap_components as dbc
 
 layout = html.Div([
     html.H3('Conversation View'),
@@ -21,7 +22,8 @@ layout = html.Div([
             html.Div([
 
                 html.Label('Last Incoming Response:'),
-                #dcc.Markdown(id='last-response', mathjax=True, style={'width': '100%'}, dangerously_allow_html=True),
+                html.P(id='last-response', style={'width': '100%'}),
+                #html.Div(id='last-response'),
             ], style={'width': '50%', 'float': 'left'}),
             html.Div([
                 html.Div([

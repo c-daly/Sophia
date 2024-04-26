@@ -19,6 +19,7 @@ class MemoryEquippedAgent(BasicAgent):
         config.logger.debug(f"response_content: {response_content}")
         message = super().format_query_response_pair(response_content)
         self.memory_store.record(message)
+        return response_content
 
 
 
