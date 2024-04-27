@@ -1,5 +1,3 @@
-# Provides a knowledge graph backed
-# memory to an LLM like gpt-3.
 from data.neo4j_wrapper import Neo4jWrapper
 from daemons.text_to_cypher_daemon import TextToCypherDaemon
 

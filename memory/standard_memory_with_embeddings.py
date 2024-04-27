@@ -22,7 +22,7 @@ class StandardMemoryWithEmbeddings(AbstractMemoryStore):
         id = mongo_response.inserted_id
         embedding = StaticOpenAIModel.generate_embedding(text)
         result = self.embeddings_store.insert_vector(embedding, str(id))
-        config.logger.debug(f"Inserting embedding for id: {id} result: {result}")
+        return id
 
     def query(self, query):
         pass
