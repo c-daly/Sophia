@@ -21,7 +21,7 @@ services:
       - "7474:7474"
       - "7687:7687"
     volumes:
-      - neo4j:/data/neo4j
+      - neo4j:/data
     environment:
       - NEO4J_AUTH=neo4j/password
   mongo:
@@ -41,7 +41,7 @@ services:
       - ETCD_QUOTA_BACKEND_BYTES=4294967296
       - ETCD_SNAPSHOT_COUNT=50000
     volumes:
-      - etcd:/etcd
+      - milvus-etcd:/etcd
     command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:2379/health"]
@@ -100,11 +100,8 @@ networks:
   default:
     name: milvus
 volumes:
-  mongo:
-  neo4j:
   standalone:
+  neo4j:
+  mongo:
   minio:
-  etcd:
-
-
-
+  milvus-etcd:
