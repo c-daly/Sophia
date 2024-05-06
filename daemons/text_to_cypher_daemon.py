@@ -12,7 +12,7 @@ class TextToCypherDaemon:
 
     @staticmethod
     def summarize_query_results(results):
-        prompt = f"Summarize the results of the query given: {results}"
+        prompt = f"Summarize the following results which were produced by a cypher query: {results}\n Do not include anything in your reply except for the summary itself."
         config.logger.info(f"Generating summary for prompt: {prompt}")
         response = StaticOpenAIModel.generate_response(messages=[{"role": "system", "content": prompt}])
         return response['choices'][0]['message']['content']
@@ -44,7 +44,7 @@ class TextToCypherDaemon:
         config.logger.info(f"Generating Cypher query for text: {prompt}")
 
         try:
-            response = StaticOpenAIModel.generate_response(messages=[{"role": "user", "content": prompt}])
+            response = StaticOpenAIModel.generate_response(messages=[{"role": "system", "content": prompt}])
         except Exception as e:
             config.logger.info(f"Error generating Cypher query: {e}")
 

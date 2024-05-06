@@ -36,7 +36,7 @@ def toggle_modal(active_cell, close_clicks, next_clicks, prev_clicks, table_data
 
         formatted_message = format_row(table_data[active_cell["row"]])
 
-        config.logger.debug(f"formatted_message: {formatted_message}")
+        #config.logger.debug(f"formatted_message: {formatted_message}")
         return True, formatted_message
 
     elif trigger_id == "next-record" and active_cell:
@@ -60,7 +60,7 @@ def toggle_modal(active_cell, close_clicks, next_clicks, prev_clicks, table_data
 
 
 def fetch_similar_interactions(search_query):
-    config.logger.debug(f"fetch_similar_interactions called with search_query: {search_query}")
+    #config.logger.debug(f"fetch_similar_interactions called with search_query: {search_query}")
     mongo = config.mongo
     if not config.milvus:
         config.milvus = MilvusWrapper()
@@ -70,7 +70,7 @@ def fetch_similar_interactions(search_query):
         ids = []
         distances = []
 
-        config.logger.debug(f"Results: {results}")
+        #config.logger.debug(f"Results: {results}")
         for result in results:
             for match in result:
                 config.logger.debug(f"Match: {match}")

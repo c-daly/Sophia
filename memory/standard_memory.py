@@ -11,7 +11,7 @@ class StandardMemory(AbstractMemoryStore):
         
     def record(self, data):
         result = self.data_store.insert_interaction(data)
-        config.logger.debug(f"Recorded data: {data}")
+        #config.logger.debug(f"Recorded data: {data}")
         return result.inserted_id
 
     def query(self, query):

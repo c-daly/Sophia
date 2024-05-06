@@ -9,7 +9,7 @@ class Neo4jWrapper:
         self._driver.close()
 
     def query(self, query, parameters=None, db=None):
-        config.logger.debug(f"Query: {query}")
+        #config.logger.debug(f"Query: {query}")
         assert db is None, "This wrapper does not support multiple databases."
         with self._driver.session(database=db) as session:
             results = list(session.run(query, parameters))

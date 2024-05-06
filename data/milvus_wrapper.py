@@ -17,7 +17,7 @@ class MilvusWrapper:
             self.collection = Collection(self.collection_name)
         self.collection.load()
         self.connected = True
-        config.logger.debug(f"collection description: {self.collection.num_entities}")
+        #config.logger.debug(f"collection description: {self.collection.num_entities}")
     def create_collection(self, dimension=1536):
         config.logger.debug(f"Creating collection {self.collection_name}")
         #if not self.connected:

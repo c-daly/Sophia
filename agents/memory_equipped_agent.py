@@ -15,7 +15,7 @@ class MemoryEquippedAgent(BasicAgent):
         response = super().generate_query_sequence(text)
         response_dict = response.to_dict()
         response_content = response_dict['choices'][0]['message']['content']
-        config.logger.debug(f"response_content: {response_content}")
+        #config.logger.debug(f"response_content: {response_content}")
         message = super().format_query_response_pair(response_content)
         self.memory_store.record(message)
         return response_content

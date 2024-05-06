@@ -49,7 +49,7 @@ class MongoWrapper:
         #    sort_column = sort_by[0]['column_id']
         #    sort_direction = pymongo.ASCENDING if sort_by[0]['direction'] == 'asc' else pymongo.DESCENDING
         #    cursor = self.collection.find().sort(sort_column, sort_direction)
-        config.logger.debug(f"Filter query: {filter_query}")
+        #config.logger.debug(f"Filter query: {filter_query}")
         cursor = self.collection.find(filter_query)
 
         print(f"Cursor: {cursor}")

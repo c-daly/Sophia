@@ -1,12 +1,15 @@
 from agents.abstract_agent import AbstractAgent
 from models.static_openai_wrapper import StaticOpenAIModel
+from prompts.prompts import DEFAULT_PROMPT
 
 
 class BasicAgent(AbstractAgent):
 
-    def __init__(self):
+    def __init__(self, prompt=DEFAULT_PROMPT):
         # Initialize tools and memory
         self.messages = []
+        self.prompt = prompt
+        self.append_message(self.prompt, "system")
 
     def format_query_response_pair(self, response):
         human_score = 0.5
