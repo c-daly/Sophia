@@ -126,3 +126,9 @@ FAILURE WILL RESULT IN A NEGATIVE REWARD.
     Input Text: {user_input}
     Output Cypher Query:
 """
+
+AGENT_SCRATCH_PAD_PROMPT = """
+{search_results}
+{kg_summary}
+{messages}
+"""
