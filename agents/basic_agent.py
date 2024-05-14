@@ -1,4 +1,5 @@
 from agents.abstract_agent import AbstractAgent
+import config
 from models.static_openai_wrapper import StaticOpenAIModel
 from prompts.prompts import DEFAULT_PROMPT
 
@@ -20,9 +21,9 @@ class BasicAgent(AbstractAgent):
 
     def generate_query_sequence(self, text):
         try:
-            response = None
             self.text = text
             self.append_message(text, "user")
+            config.logger.info(f"Sending messages: {self.messages}")
             response = StaticOpenAIModel.generate_response(self.messages)
             response_text = response.choices[0].message['content'].strip()
             self.append_message(response_text, "assistant")

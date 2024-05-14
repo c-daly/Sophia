@@ -4,7 +4,7 @@ from tools.web_search_tool import WebSearchTool
 import config
 
 class MemoryEquippedAgent(BasicAgent):
-    def __init__(self, memory_store=None):
+    def __init__(self, agent_state=None, memory_store=None):
         if not memory_store:
             self.memory_store = StandardMemoryWithEmbeddingsAndKG()
         else:
@@ -14,13 +14,15 @@ class MemoryEquippedAgent(BasicAgent):
 
     def apply_tools(self, text):
         search_result = WebSearchTool.run(text)
-        for result in search_result:
-            config.logger.info(f"Result: {result}")
-        return search_result
+        interim_result = [f"title: {result.title}\tdescription: {result.description}\turl: {result.url}\n"for result in search_result]
+        config.logger.info(f"Google Search Results: {interim_result}")
+        return "Google Search Results:\n" + ''.join(interim_result)
 
     def generate_query_sequence(self, text):
         result = self.apply_tools(text)
+        self.append_message(result, "system")
         response = super().generate_query_sequence(text)
+        config.logger.info(f"Response: {response}")
         response_dict = response.to_dict()
         response_content = response_dict['choices'][0]['message']['content']
         message = super().format_query_response_pair(response_content)
