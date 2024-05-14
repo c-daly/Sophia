@@ -1,4 +1,3 @@
-import langchain
 from tools.abstract_tool import AbstractTool
 from googlesearch import search
 

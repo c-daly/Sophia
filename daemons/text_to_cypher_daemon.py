@@ -13,7 +13,7 @@ class TextToCypherDaemon:
     @staticmethod
     def summarize_query_results(results):
         prompt = f"Summarize the following results which were produced by a cypher query: {results}\n Do not include anything in your reply except for the summary itself."
-        config.logger.info(f"Generating summary for prompt: {prompt}")
+        #config.logger.info(f"Generating summary for prompt: {prompt}")
         response = StaticOpenAIModel.generate_response(messages=[{"role": "system", "content": prompt}])
         return response['choices'][0]['message']['content']
 
@@ -34,21 +34,21 @@ class TextToCypherDaemon:
 
         summary = TextToCypherDaemon.summarize_query_results(initial_results)
 
-        config.logger.info(f"Generated summary: {summary}")
-        config.logger.info(f"Generated initial results: {initial_results}")
+        #config.logger.info(f"Generated summary: {summary}")
+        #config.logger.info(f"Generated initial results: {initial_results}")
 
         # Then we can query the database for the information
         # and add that to the prompt we send to the model
         # to get the final query
         prompt = KG_PROMPT.format(user_input=text, existing_data=summary)
-        config.logger.info(f"Generating Cypher query for text: {prompt}")
+        #config.logger.info(f"Generating Cypher query for text: {prompt}")
 
         try:
             response = StaticOpenAIModel.generate_response(messages=[{"role": "system", "content": prompt}])
         except Exception as e:
             config.logger.info(f"Error generating Cypher query: {e}")
 
-        config.logger.info(f"Generated Cypher query: {response['choices'][0]['message']['content']}")
+        #config.logger.info(f"Generated Cypher query: {response['choices'][0]['message']['content']}")
         result = response['choices'][0]['message']['content']
 
         if "cypher" in result.lower():

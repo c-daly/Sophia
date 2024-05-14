@@ -23,7 +23,7 @@ class BasicAgent(AbstractAgent):
         try:
             self.text = text
             self.append_message(text, "user")
-            config.logger.info(f"Sending messages: {self.messages}")
+            #config.logger.info(f"Sending messages: {self.messages}")
             response = StaticOpenAIModel.generate_response(self.messages)
             response_text = response.choices[0].message['content'].strip()
             self.append_message(response_text, "assistant")
