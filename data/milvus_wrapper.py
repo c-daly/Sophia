@@ -1,5 +1,13 @@
 import config
-from pymilvus import Milvus, DataType, IndexType, CollectionSchema, FieldSchema, connections, Collection, utility
+from pymilvus import (
+    connections,
+    Collection,
+    CollectionSchema,
+    FieldSchema,
+    DataType,
+    utility
+)
+
 class MilvusWrapper:
     # This connection needs to be made lazy
     def __init__(self, host='standalone', port='19530', collection_name='sophia'):
