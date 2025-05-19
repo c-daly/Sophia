@@ -74,9 +74,4 @@ Contributions are welcome! Feel free to fork this repo, submit PRs, or open issu
 
 MIT License
 
----
 
-## Contact
-
-Created by [Christopher D. Daly](https://github.com/c-daly). For questions or feedback, feel free to reach out via [email](mailto:chris@cdaly.me).
- 
