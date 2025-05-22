@@ -13,6 +13,6 @@ class WebSearchTool(AbstractTool):
 
     @staticmethod
     def get_name():
-        return self.name
+        return "Web Search"
 
 

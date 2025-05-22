@@ -143,6 +143,28 @@ tool_agent = ToolAgent(
 )
 ```
 
+### Using Existing AbstractTool Implementations
+
+The `ToolAdapterBridge` provides compatibility with existing tools that implement the `AbstractTool` interface:
+
+```python
+from tools.web_search_tool import WebSearchTool
+from agents.tool_adapter_bridge import ToolAdapterBridge
+
+# Create the original tool
+web_search_tool = WebSearchTool()
+
+# Wrap it as a stateful agent
+web_search_agent = ToolAdapterBridge(web_search_tool)
+
+# Use it with the new interface
+response = web_search_agent.start("search query")
+print(response.output)
+
+# Use it with the legacy interface
+result = web_search_agent.generate_query_sequence("search query")
+```
+
 ## Running Agents
 
 ### CLI Driver
