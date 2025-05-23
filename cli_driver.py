@@ -74,7 +74,7 @@ def main():
     else:
         # Single response mode
         if not args.input:
-            print("Error: Input required in non-interactive mode")
+            print("Error: Input required in non-interactive mode", file=sys.stderr)
             sys.exit(1)
         
         # Run the agent and print the response
