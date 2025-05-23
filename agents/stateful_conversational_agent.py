@@ -65,7 +65,7 @@ class StatefulConversationalAgent(AbstractAgent):
         try:
             # Generate a response using the current history
             response = StaticOpenAIModel.generate_response(state.get_messages_for_llm())
-            response_text = response.choices[0].message['content'].strip()
+            response_text = response.output_text
             
             # Update the state with the new assistant response
             state.add_message("assistant", response_text)
