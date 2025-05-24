@@ -43,6 +43,7 @@ class SophiaAgent(AbstractAgent):
         
         # Set the input for processing
         state.user_msg = AgentInput(content=input_content, metadata=metadata)
+        state.input = AgentInput(content=input_content, metadata=metadata)
         # Process this initial state
         return self.step(state)
     
@@ -57,11 +58,11 @@ class SophiaAgent(AbstractAgent):
             An AgentResponse with the updated state and agent's output
         """
         try:
-            thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REACTIVE, max_iterations=3, cot="expose")
+            thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REFLEX, max_iterations=3)
             response = thinking_styles.think(StaticOpenAIModel.generate_response, state, thinking_config)
             # Generate a response using the current history
             #response = StaticOpenAIModel.generate_response(state.get_messages_for_llm())
-            response_text = response #.output_text
+            response_text = response.output_text
             
             # Update the state with the new assistant response
             state.add_message("assistant", response_text)

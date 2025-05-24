@@ -97,7 +97,6 @@ class AgentOutput:
         ...     }
         ... )
     """
-
     def __init__(self, text: str, metadata: Optional[Dict[str, Any]] = None):
         """
         Initialize an agent output with text and optional metadata.
@@ -107,4 +106,4 @@ class AgentOutput:
             metadata: Optional dictionary containing additional information
         """
         self.text = text
-        self.metadata = metadata or {}
+        #self.metadata = metadata or {}

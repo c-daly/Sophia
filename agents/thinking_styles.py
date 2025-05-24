@@ -12,7 +12,7 @@ You can pass in your full ConversationState object.
 from __future__ import annotations
 from enum import Enum
 from typing import Any, Callable, Optional, List
-
+from agents.agent_interfaces import AgentState
 from pydantic import BaseModel
 
 
@@ -36,7 +36,7 @@ class ThinkingConfig(BaseModel):
     style: ThinkStyle = ThinkStyle.REFLEX
     temperature: float = 0.1
     max_iterations: int = 3
-    cot: CoTVisibility = CoTVisibility.EXPOSE
+    cot: CoTVisibility = CoTVisibility.HIDDEN
     model_name: str = "gpt-4o-mini"        # picked by chooser
 
 
@@ -46,7 +46,7 @@ class ThinkingConfig(BaseModel):
 
 def think(
     llm_chat: Callable[[List[dict]]],
-    state: Any,
+    state: AgentState,
     cfg: ThinkingConfig
 ) -> str:
     """
@@ -54,7 +54,7 @@ def think(
         Narrow adapter around your OpenAI helper so we can swap in any backend.
 
     state must expose:
-        .user_msg : str
+        .input : str
         .tool_runner(name:str, args:dict) -> Any   (only used by REACTIVE)
     """
     if cfg.style is ThinkStyle.REFLEX:
@@ -83,9 +83,8 @@ def _reflex(llm_chat, state, cfg) -> str:
         {"role": "user",   "content": state.user_msg.content},
     ]
     raw = llm_chat(messages, cfg.model_name, cfg.temperature)
-    raw = raw.output_text
-    if cfg.cot is CoTVisibility.HIDDEN:
-        return raw.split("⧉ANSWER⧉")[-1].strip()
+    #if True: #cfg.cot is CoTVisibility.HIDDEN:
+    #    return raw.split("⧉ANSWER⧉")[-1].strip()
     return raw
 
 
