@@ -6,6 +6,37 @@ and provide a consistent interface for agent inputs and outputs.
 """
 
 from typing import Dict, Any, Optional
+from enum import Enum
+from pydantic import BaseModel
+from pydantic_settings import BaseSettings
+from typing import Any, Dict, Optional
+from agents.thinking_styles import ThinkingConfig
+
+class Settings(BaseSettings):
+    """
+    Global settings for the Sophia agent.
+    This class allows for configuration of various parameters
+    that affect the agent's behavior and performance.
+    """
+    # Agent settings
+    thinking: ThinkingConfig = ThinkingConfig()
+
+class ToolSpec(BaseModel):
+    """
+    Specification for a tool that the agent can use.
+    This includes the tool's name, description, input schema,
+    handler function, and optional output schema.
+    The handler function is expected to be a callable that takes
+    the input data and returns the output data.
+    The input and output schemas are defined using JSON-schema
+    format, allowing for validation and documentation of the data
+    structures used by the tool.
+    """
+    name: str
+    description: str                       # ≤ 2 sentences
+    input_schema: Dict[str, Any]           # JSON-schema
+    handler: Any                           # python callable
+    output_schema: Optional[Dict[str, Any]] = None
 
 
 class AgentInput:

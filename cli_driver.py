@@ -14,6 +14,7 @@ from agents.stateful_conversational_agent import StatefulConversationalAgent
 from agents.tool_agent import create_calculator_agent
 from agents.agent_loop import AgentLoop
 from agents.abstract_agent import AbstractAgent
+from agents.sophia_agent import SophiaAgent
 
 def get_available_agents() -> Dict[str, Callable[[], AbstractAgent]]:
     """
@@ -24,7 +25,8 @@ def get_available_agents() -> Dict[str, Callable[[], AbstractAgent]]:
     """
     return {
         "conversational": lambda: StatefulConversationalAgent(),
-        "calculator": create_calculator_agent
+        "calculator": create_calculator_agent,
+        "sophia": lambda: SophiaAgent()
     }
 
 
