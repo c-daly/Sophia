@@ -7,7 +7,7 @@ import openai
 class StaticOpenAIModel:
 
     @staticmethod
-    def generate_response(messages, model="gpt-3.5-turbo"):
+    def generate_response(messages, model="gpt-3.5-turbo", temperature=0.0):
        # config.logger.debug(f"Entering generate_response with messages: {messages}")
         response_obj = openai.responses.create(
             model=model,

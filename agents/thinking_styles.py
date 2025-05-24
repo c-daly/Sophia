@@ -36,7 +36,7 @@ class ThinkingConfig(BaseModel):
     style: ThinkStyle = ThinkStyle.REFLEX
     temperature: float = 0.1
     max_iterations: int = 3
-    cot: CoTVisibility = CoTVisibility.HIDDEN
+    cot: CoTVisibility = CoTVisibility.EXPOSE
     model_name: str = "gpt-4o-mini"        # picked by chooser
 
 
@@ -80,9 +80,10 @@ def _reflex(llm_chat, state, cfg) -> str:
         )
     messages = [
         {"role": "system", "content": system_prompt},
-        {"role": "user",   "content": state.user_msg},
+        {"role": "user",   "content": state.user_msg.content},
     ]
     raw = llm_chat(messages, cfg.model_name, cfg.temperature)
+    raw = raw.output_text
     if cfg.cot is CoTVisibility.HIDDEN:
         return raw.split("⧉ANSWER⧉")[-1].strip()
     return raw
@@ -100,11 +101,12 @@ def _reactive(llm_chat, state, cfg) -> str:
             "ACTION: {\"name\": tool_name, \"arguments\": {...}}  # optional\n"
             "OBSERVATION: ...                                    # set by system\n"
             "When ready, respond with FINAL: <answer to user>"},
-        {"role": "user", "content": state.user_msg},
+        {"role": "user", "content": state.user_msg.content},
     ]
 
     for _ in range(cfg.max_iterations):
         assistant = llm_chat(messages, cfg.model_name, cfg.temperature)
+        assistant = assistant.output_text.strip()
         messages.append({"role": "assistant", "content": assistant})
 
         # finished?
@@ -134,11 +136,13 @@ def _reflective(llm_chat, state, cfg) -> str:
         [
             {"role": "system", "content":
                 "Think step-by-step, then output ⧉ANSWER⧉ and your final answer."},
-            {"role": "user", "content": state.user_msg},
+            {"role": "user", "content": state.user_msg.content},
         ],
         cfg.model_name,
         cfg.temperature,
     )
+
+    draft = draft.output_text
     answer = draft.split("⧉ANSWER⧉")[-1].strip()
 
     # 2) Critique
@@ -151,7 +155,10 @@ def _reflective(llm_chat, state, cfg) -> str:
         ],
         cfg.model_name,
         0,
-    ).strip()
+    )
+
+    critique = critique.output_text.strip()
+
 
     # 3) Optional revision
     if critique != "NONE":
@@ -165,6 +172,8 @@ def _reflective(llm_chat, state, cfg) -> str:
             ],
             cfg.model_name,
             cfg.temperature,
-        ).strip()
+        )
+
+        answer = answer.output_text.strip()
     return answer
 

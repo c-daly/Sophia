@@ -53,7 +53,7 @@ class AgentAction:
 @dataclass
 class AgentState:
     """The current state of an agent's processing."""
-    input: Optional[AgentInput] = None  # Current input being processed
+    user_msg: Optional[AgentInput] = None  # Current input being processed
     history: List[Message] = field(default_factory=list)  # Conversation history
     next_action: AgentAction = field(default_factory=lambda: AgentAction(type=ActionType.PENDING))
     working_memory: Dict[str, Any] = field(default_factory=dict)  # Agent's working memory
