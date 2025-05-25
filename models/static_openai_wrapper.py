@@ -1,4 +1,5 @@
 import openai
+import config
 
 """
      This is a simple static wrapper class for the OpenAI API.
@@ -8,7 +9,7 @@ class StaticOpenAIModel:
 
     @staticmethod
     def generate_response(messages, model="gpt-3.5-turbo"):
-       # config.logger.debug(f"Entering generate_response with messages: {messages}")
+        config.logger.debug(f"Entering generate_response with messages: {messages}")
         response_obj = openai.responses.create(
             model=model,
             input=messages,

@@ -42,7 +42,13 @@ def main():
         "--interactive", "-i",
         action="store_true",
         help="Run in interactive mode"
+    )    
+    parser.add_argument(
+        "--debug", "-d",
+        action="store_true",
+        help="Run in debug mode"
     )
+ 
     parser.add_argument(
         "input",
         nargs="?",
@@ -59,6 +65,8 @@ def main():
     # Create an agent loop
     loop = AgentLoop(agent)
     
+    if args.debug:
+        print("Debug mode enabled. Agent state will be printed after each interaction.")
     if args.interactive:
         # Interactive mode
         if args.input:
