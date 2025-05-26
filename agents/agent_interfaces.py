@@ -43,11 +43,107 @@ class ToolCall:
 
 @dataclass
 class AgentAction:
-    """Action determined by the agent to take next."""
+    """
+    Action determined by the agent to take next.
+    
+    The payload dict contains action-specific data:
+    - For RESPOND actions: {"content": str} - The response content
+    - For TOOL_CALL actions: {"tool_call": ToolCall} - The tool call specification
+    - For DELEGATE actions: {"delegate_to": str} - The name of the agent to delegate to
+    - For COMPLETE actions: {} - No additional data required
+    - For PENDING actions: {} - No additional data required
+    
+    The metadata dict can contain any additional contextual information.
+    """
     type: ActionType
-    content: Optional[str] = None  # Content for RESPOND actions
-    tool_call: Optional[ToolCall] = None  # Details for TOOL_CALL actions
-    delegate_to: Optional[str] = None  # Name of agent to delegate to for DELEGATE actions
+    payload: Dict[str, Any] = field(default_factory=dict)  # Generic payload for all action types
+    metadata: Dict[str, Any] = field(default_factory=dict)  # Additional context or logging
+    
+    @classmethod
+    def respond(cls, content: str, **metadata) -> 'AgentAction':
+        """
+        Create a RESPOND action.
+        
+        Args:
+            content: The response content
+            metadata: Optional metadata
+            
+        Returns:
+            An AgentAction of type RESPOND
+        """
+        return cls(
+            type=ActionType.RESPOND,
+            payload={"content": content},
+            metadata=metadata
+        )
+    
+    @classmethod
+    def tool_call(cls, tool_call: ToolCall, **metadata) -> 'AgentAction':
+        """
+        Create a TOOL_CALL action.
+        
+        Args:
+            tool_call: The tool call specification
+            metadata: Optional metadata
+            
+        Returns:
+            An AgentAction of type TOOL_CALL
+        """
+        return cls(
+            type=ActionType.TOOL_CALL,
+            payload={"tool_call": tool_call},
+            metadata=metadata
+        )
+    
+    @classmethod
+    def delegate(cls, agent_name: str, **metadata) -> 'AgentAction':
+        """
+        Create a DELEGATE action.
+        
+        Args:
+            agent_name: The name of the agent to delegate to
+            metadata: Optional metadata
+            
+        Returns:
+            An AgentAction of type DELEGATE
+        """
+        return cls(
+            type=ActionType.DELEGATE,
+            payload={"delegate_to": agent_name},
+            metadata=metadata
+        )
+    
+    @classmethod
+    def complete(cls, **metadata) -> 'AgentAction':
+        """
+        Create a COMPLETE action.
+        
+        Args:
+            metadata: Optional metadata
+            
+        Returns:
+            An AgentAction of type COMPLETE
+        """
+        return cls(
+            type=ActionType.COMPLETE,
+            metadata=metadata
+        )
+    
+    @classmethod
+    def pending(cls, **metadata) -> 'AgentAction':
+        """
+        Create a PENDING action.
+        
+        Args:
+            metadata: Optional metadata
+            
+        Returns:
+            An AgentAction of type PENDING
+        """
+        return cls(
+            type=ActionType.PENDING,
+            metadata=metadata
+        )
 
 
 @dataclass
@@ -55,7 +151,7 @@ class AgentState:
     """The current state of an agent's processing."""
     input: Optional[AgentInput] = None  # Current input being processed
     history: List[Message] = field(default_factory=list)  # Conversation history
-    next_action: AgentAction = field(default_factory=lambda: AgentAction(type=ActionType.PENDING))
+    next_action: AgentAction = field(default_factory=lambda: AgentAction.pending())
     working_memory: Dict[str, Any] = field(default_factory=dict)  # Agent's working memory
     metadata: Dict[str, Any] = field(default_factory=dict)  # Additional state information
 
