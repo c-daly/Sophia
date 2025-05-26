@@ -14,6 +14,7 @@ from agents.stateful_conversational_agent import StatefulConversationalAgent
 from agents.tool_agent import create_calculator_agent
 from agents.agent_loop import AgentLoop
 from agents.abstract_agent import AbstractAgent
+import config
 
 def get_available_agents() -> Dict[str, Callable[[], AbstractAgent]]:
     """
@@ -66,6 +67,7 @@ def main():
     loop = AgentLoop(agent)
     
     if args.debug:
+        config.debug = True
         print("Debug mode enabled. Agent state will be printed after each interaction.")
     if args.interactive:
         # Interactive mode
