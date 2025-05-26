@@ -144,6 +144,22 @@ class AgentAction:
             type=ActionType.PENDING,
             metadata=metadata
         )
+    
+    # Properties for backward compatibility
+    @property
+    def content(self) -> Optional[str]:
+        """Get content from payload for backward compatibility."""
+        return self.payload.get("content")
+    
+    @property
+    def tool_call_data(self) -> Optional[ToolCall]:
+        """Get tool_call from payload for backward compatibility."""
+        return self.payload.get("tool_call")
+    
+    @property
+    def delegate_to(self) -> Optional[str]:
+        """Get delegate_to from payload for backward compatibility."""
+        return self.payload.get("delegate_to")
 
 
 @dataclass

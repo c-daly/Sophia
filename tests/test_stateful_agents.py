@@ -78,6 +78,27 @@ class TestAgentInterfaces(unittest.TestCase):
         action = AgentAction.pending()
         self.assertEqual(action.type, ActionType.PENDING)
         self.assertEqual(action.payload, {})
+    
+    def test_agent_action_backward_compatibility(self):
+        """Test backward compatibility of AgentAction payload with old attributes."""
+        # Create action using the new payload approach
+        action = AgentAction.respond("Hello, world!")
+        
+        # Verify that the payload is accessible directly via attribute access
+        # This ensures backward compatibility with code that expects direct attributes
+        self.assertEqual(action.content, "Hello, world!")
+        self.assertEqual(action.payload["content"], "Hello, world!")
+        
+        # Test tool_call
+        tool_call = ToolCall(name="calculator", parameters={"expression": "2+2"})
+        action = AgentAction.tool_call(tool_call)
+        self.assertEqual(action.tool_call_data, tool_call)
+        self.assertEqual(action.payload["tool_call"], tool_call)
+        
+        # Test delegate
+        action = AgentAction.delegate("math_agent")
+        self.assertEqual(action.delegate_to, "math_agent")
+        self.assertEqual(action.payload["delegate_to"], "math_agent")
 
 
 class TestToolFunctionality(unittest.TestCase):
