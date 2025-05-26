@@ -71,10 +71,7 @@ class StatefulConversationalAgent(AbstractAgent):
             state.add_message("assistant", response_text)
             
             # Set the next action to respond with the generated text
-            state.next_action = AgentAction(
-                type=ActionType.RESPOND,
-                content=response_text
-            )
+            state.next_action = AgentAction.respond(response_text)
             
             return AgentResponse(
                 state=state,

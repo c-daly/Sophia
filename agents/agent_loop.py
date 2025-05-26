@@ -65,13 +65,14 @@ class AgentLoop:
         response = self.agent.step(state)
         
         # Process any actions the agent determined to take
-        if response.state.next_action.type == ActionType.TOOL_CALL and response.state.next_action.tool_call:
+        if response.state.next_action.type == ActionType.TOOL_CALL and "tool_call" in response.state.next_action.payload:
             # Execute the tool call
-            tool_name = response.state.next_action.tool_call.name
+            tool_call = response.state.next_action.payload["tool_call"]
+            tool_name = tool_call.name
             if tool_name in self.tool_registry:
                 tool_function = self.tool_registry[tool_name]
                 try:
-                    result = tool_function(**response.state.next_action.tool_call.parameters)
+                    result = tool_function(**tool_call.parameters)
                     # Record the tool result in history
                     response.state.add_message("tool", str(result))
                     # Update the input for the next step
