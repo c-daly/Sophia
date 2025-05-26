@@ -14,6 +14,7 @@ from enum import Enum
 from typing import Any, Callable, Optional, List
 from agents.agent_interfaces import AgentState, AgentResponse
 from pydantic import BaseModel
+import config
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -100,14 +101,20 @@ def _reactive(llm_chat, state, cfg) -> AgentResponse:
             "THOUGHT: ...\n"
             "ACTION: {\"name\": tool_name, \"arguments\": {...}}  # optional\n"
             "OBSERVATION: ...                                    # set by system\n"
-            "When ready, respond with FINAL: <answer to user>"},
-        {"role": "user", "content": state.user_msg.content},
+            "When you have a complete and correct reply, respond with FINAL: <answer to user>"},
+        {"role": "user", "content": state.input.content},
     ]
+
+    if config.debug:
+        print(f"User message: {state.input.content}")
 
     for _ in range(cfg.max_iterations):
         assistant = llm_chat(messages, cfg.model_name, cfg.temperature)
         assistant = assistant.output_text.strip()
         messages.append({"role": "assistant", "content": assistant})
+
+        if config.debug:
+            print(f"LLM response: {assistant}")
 
         # finished?
         if assistant.startswith("FINAL:"):
@@ -151,11 +158,14 @@ def _reflective(llm_chat, state, cfg) -> AgentResponse:
     draft = draft.output_text
     answer = draft.split("⧉ANSWER⧉")[-1].strip()
 
+    if config.debug:
+        print(f"Draft answer: {answer}")
+
     # 2) Critique
     critique = llm_chat(
         [
             {"role": "system", "content":
-                "You are a critic. Identify factual errors, missing info, tone issues."},
+                "You are a critic. Identify factual errors, missing info, tone issues. Expand the answer to be more helpful, if necessary."},
             {"role": "assistant", "content": answer},
             {"role": "user", "content": "List issues or reply NONE."},
         ],
@@ -164,6 +174,8 @@ def _reflective(llm_chat, state, cfg) -> AgentResponse:
     )
 
     critique = critique.output_text.strip()
+    if config.debug:
+        print(f"Critique: {critique}")
 
 
     # 3) Optional revision

@@ -60,7 +60,7 @@ class SophiaAgent(AbstractAgent):
         """
         try:
             # This selection should ultimately be dynamic
-            thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REFLECTIVE, max_iterations=3, cot=thinking_styles.CoTVisibility.EXPOSE)
+            thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REACTIVE, max_iterations=3, cot=thinking_styles.CoTVisibility.EXPOSE)
             response = thinking_styles.think(StaticOpenAIModel.generate_response, state, thinking_config)
 
             if config.debug:
@@ -72,9 +72,9 @@ class SophiaAgent(AbstractAgent):
             state.add_message("assistant", response_text)
             
             # Set the next action to respond with the generated text
-            state.next_action = AgentAction(
-                type=ActionType.RESPOND,
-                content=response_text
+            state.next_action = AgentAction.respond(
+                content=response_text,
+                metadata={"thinking_style": thinking_config.style.name}
             )
             
             return AgentResponse(
