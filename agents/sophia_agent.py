@@ -3,6 +3,7 @@ from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, Agent
 from models.static_openai_wrapper import StaticOpenAIModel
 from prompts.prompts import DEFAULT_PROMPT
 import agents.thinking_styles as thinking_styles
+import config
 
 
 class SophiaAgent(AbstractAgent):
@@ -58,11 +59,14 @@ class SophiaAgent(AbstractAgent):
             An AgentResponse with the updated state and agent's output
         """
         try:
-            thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REFLEX, max_iterations=3)
+            # This selection should ultimately be dynamic
+            thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REFLECTIVE, max_iterations=3, cot=thinking_styles.CoTVisibility.EXPOSE)
             response = thinking_styles.think(StaticOpenAIModel.generate_response, state, thinking_config)
-            # Generate a response using the current history
-            #response = StaticOpenAIModel.generate_response(state.get_messages_for_llm())
-            response_text = response.output_text
+
+            if config.debug:
+                print(f"Agent response: {response.output}")
+
+            response_text = response.output
             
             # Update the state with the new assistant response
             state.add_message("assistant", response_text)

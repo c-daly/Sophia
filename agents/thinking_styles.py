@@ -12,7 +12,7 @@ You can pass in your full ConversationState object.
 from __future__ import annotations
 from enum import Enum
 from typing import Any, Callable, Optional, List
-from agents.agent_interfaces import AgentState
+from agents.agent_interfaces import AgentState, AgentResponse
 from pydantic import BaseModel
 
 
@@ -48,7 +48,7 @@ def think(
     llm_chat: Callable[[List[dict]]],
     state: AgentState,
     cfg: ThinkingConfig
-) -> str:
+) -> AgentResponse:
     """
     llm_chat(messages, model_name, temperature) -> str
         Narrow adapter around your OpenAI helper so we can swap in any backend.
@@ -70,7 +70,7 @@ def think(
 #  Strategy implementations
 # ──────────────────────────────────────────────────────────────────────────────
 
-def _reflex(llm_chat, state, cfg) -> str:
+def _reflex(llm_chat, state, cfg) -> AgentResponse:
     """Single pass; no chain-of-thought unless cfg.cot != NONE."""
     system_prompt = "Answer the user concisely and accurately."
     if cfg.cot is CoTVisibility.HIDDEN:
@@ -83,12 +83,13 @@ def _reflex(llm_chat, state, cfg) -> str:
         {"role": "user",   "content": state.user_msg.content},
     ]
     raw = llm_chat(messages, cfg.model_name, cfg.temperature)
-    #if True: #cfg.cot is CoTVisibility.HIDDEN:
-    #    return raw.split("⧉ANSWER⧉")[-1].strip()
-    return raw
+    raw = raw.output_text.strip()
+    if cfg.cot is CoTVisibility.HIDDEN:
+        return AgentResponse(state=state, output=raw.split("⧉ANSWER⧉")[-1].strip())
+    return AgentResponse(state=state, output=raw)
 
 
-def _reactive(llm_chat, state, cfg) -> str:
+def _reactive(llm_chat, state, cfg) -> AgentResponse:
     """
     Simple ReAct loop:
         Thought -> (optional) tool call -> Observation … finish.
@@ -110,7 +111,10 @@ def _reactive(llm_chat, state, cfg) -> str:
 
         # finished?
         if assistant.startswith("FINAL:"):
-            return assistant[len("FINAL:"):].strip()
+            return AgentResponse(
+                    state=state,
+                    output = assistant[len("FINAL:"):].strip(),
+            )
 
         # tool invocation?
         if "ACTION:" in assistant:
@@ -125,10 +129,13 @@ def _reactive(llm_chat, state, cfg) -> str:
                     f"OBSERVATION: tool_error: {exc}"})
 
     # fallback
-    return "Sorry, I couldn't complete that in time."
+    return AgentResponse(
+        state=state,
+        output="I couldn't complete the task in time. Please try again.",
+    )
 
 
-def _reflective(llm_chat, state, cfg) -> str:
+def _reflective(llm_chat, state, cfg) -> AgentResponse:
     """Draft ➔ self-critique ➔ optional revision.  ≤3 LLM calls."""
     # 1) Draft with hidden CoT
     draft = llm_chat(
@@ -173,6 +180,5 @@ def _reflective(llm_chat, state, cfg) -> str:
             cfg.temperature,
         )
 
-        answer = answer.output_text.strip()
-    return answer
+    return AgentResponse(state=state, output=answer)
 
