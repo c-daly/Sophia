@@ -14,6 +14,7 @@ from enum import Enum
 from typing import Any, Callable, Optional, List
 from agents.agent_interfaces import AgentState, AgentResponse
 from pydantic import BaseModel
+from models.abstract_model import AbstractModel
 import config
 
 
@@ -46,7 +47,7 @@ class ThinkingConfig(BaseModel):
 # ──────────────────────────────────────────────────────────────────────────────
 
 def think(
-    llm_chat: Callable[[List[dict]]],
+    llm_chat: AbstractModel,
     state: AgentState,
     cfg: ThinkingConfig
 ) -> AgentResponse:
@@ -83,8 +84,8 @@ def _reflex(llm_chat, state, cfg) -> AgentResponse:
         {"role": "system", "content": system_prompt},
         {"role": "user",   "content": state.user_msg.content},
     ]
-    raw = llm_chat(messages, cfg.model_name, cfg.temperature)
-    raw = raw.output_text.strip()
+    raw = llm_chat.generate_response(messages)
+    raw = raw.outputt.strip()
     if cfg.cot is CoTVisibility.HIDDEN:
         return AgentResponse(state=state, output=raw.split("⧉ANSWER⧉")[-1].strip())
     return AgentResponse(state=state, output=raw)
@@ -109,8 +110,8 @@ def _reactive(llm_chat, state, cfg) -> AgentResponse:
         print(f"User message: {state.input.content}")
 
     for _ in range(cfg.max_iterations):
-        assistant = llm_chat(messages, cfg.model_name, cfg.temperature)
-        assistant = assistant.output_text.strip()
+        assistant = llm_chat.generate_response(messages)
+        assistant = assistant.output.strip()
         messages.append({"role": "assistant", "content": assistant})
 
         if config.debug:
@@ -145,32 +146,28 @@ def _reactive(llm_chat, state, cfg) -> AgentResponse:
 def _reflective(llm_chat, state, cfg) -> AgentResponse:
     """Draft ➔ self-critique ➔ optional revision.  ≤3 LLM calls."""
     # 1) Draft with hidden CoT
-    draft = llm_chat(
+    draft = llm_chat.generate_response(
         [
             {"role": "system", "content":
                 "Think step-by-step, then output ⧉ANSWER⧉ and your final answer."},
             {"role": "user", "content": state.user_msg.content},
         ],
-        cfg.model_name,
-        cfg.temperature,
     )
 
-    draft = draft.output_text
+    draft = draft.output
     answer = draft.split("⧉ANSWER⧉")[-1].strip()
 
     if config.debug:
         print(f"Draft answer: {answer}")
 
     # 2) Critique
-    critique = llm_chat(
+    critique = llm_chat.generate_response(
         [
             {"role": "system", "content":
                 "You are a critic. Identify factual errors, missing info, tone issues. Expand the answer to be more helpful, if necessary."},
             {"role": "assistant", "content": answer},
             {"role": "user", "content": "List issues or reply NONE."},
         ],
-        cfg.model_name,
-        0,
     )
 
     critique = critique.output_text.strip()
@@ -180,7 +177,7 @@ def _reflective(llm_chat, state, cfg) -> AgentResponse:
 
     # 3) Optional revision
     if critique != "NONE":
-        answer = llm_chat(
+        answer = llm_chat.generate_response(
             [
                 {"role": "system", "content":
                     "Revise the answer so it addresses the critique. "
@@ -188,9 +185,7 @@ def _reflective(llm_chat, state, cfg) -> AgentResponse:
                 {"role": "assistant", "content": answer},
                 {"role": "user", "content": f"Critique:\n{critique}"},
             ],
-            cfg.model_name,
-            cfg.temperature,
         )
 
-    return AgentResponse(state=state, output=answer)
+    return AgentResponse(state=state, output=answer.output)
 

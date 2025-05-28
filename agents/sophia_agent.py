@@ -62,7 +62,7 @@ class SophiaAgent(AbstractAgent):
         try:
             # This selection should ultimately be dynamic
             thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REACTIVE, max_iterations=3, cot=thinking_styles.CoTVisibility.EXPOSE)
-            response = thinking_styles.think(self.model.generate_response, state, thinking_config)
+            response = thinking_styles.think(self.model, state, thinking_config)
 
             if config.debug:
                 print(f"Agent response: {response.output}")
