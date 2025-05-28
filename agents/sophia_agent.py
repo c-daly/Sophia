@@ -1,6 +1,6 @@
 from agents.abstract_agent import AbstractAgent
 from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, AgentAction, ActionType
-from models.static_openai_wrapper import StaticOpenAIModel
+from models.openai_wrapper import OpenAIModel
 from prompts.prompts import DEFAULT_PROMPT
 import agents.thinking_styles as thinking_styles
 import config
@@ -22,8 +22,9 @@ class SophiaAgent(AbstractAgent):
             system_prompt: The system prompt to use for the agent
         """
         self.system_prompt = system_prompt
+        self.model = OpenAIModel()
+                
 
-    
     def start(self, input_content: str, **metadata) -> AgentResponse:
         """
         Start a new session.
@@ -61,7 +62,7 @@ class SophiaAgent(AbstractAgent):
         try:
             # This selection should ultimately be dynamic
             thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REACTIVE, max_iterations=3, cot=thinking_styles.CoTVisibility.EXPOSE)
-            response = thinking_styles.think(StaticOpenAIModel.generate_response, state, thinking_config)
+            response = thinking_styles.think(self.model.generate_response, state, thinking_config)
 
             if config.debug:
                 print(f"Agent response: {response.output}")

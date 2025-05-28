@@ -7,7 +7,7 @@ It serves as an example of how to build agents with the new lifecycle model.
 
 from agents.abstract_agent import AbstractAgent
 from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, AgentAction, ActionType
-from models.static_openai_wrapper import StaticOpenAIModel
+from models.openai_wrapper import OpenAIModel as OpenAIModel
 from prompts.prompts import DEFAULT_PROMPT
 
 
@@ -19,7 +19,7 @@ class StatefulConversationalAgent(AbstractAgent):
     and state between interactions.
     """
     
-    def __init__(self, system_prompt=DEFAULT_PROMPT):
+    def __init__(self, model=None, system_prompt=DEFAULT_PROMPT):
         """
         Initialize the stateful conversational agent.
         
@@ -27,6 +27,7 @@ class StatefulConversationalAgent(AbstractAgent):
             system_prompt: The system prompt to use for the agent
         """
         self.system_prompt = system_prompt
+        self.model = model if model else OpenAIModel()
     
     def start(self, input_content: str, **metadata) -> AgentResponse:
         """
@@ -64,8 +65,8 @@ class StatefulConversationalAgent(AbstractAgent):
         """
         try:
             # Generate a response using the current history
-            response = StaticOpenAIModel.generate_response(state.get_messages_for_llm())
-            response_text = response.output_text
+            response = self.model.generate_response(state.get_messages_for_llm())
+            response_text = response.output
             
             # Update the state with the new assistant response
             state.add_message("assistant", response_text)
