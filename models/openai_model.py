@@ -1,9 +1,20 @@
 import os
 import openai
+import sys
+from pathlib import Path
+
+# Add the config directory to sys.path to import the config module
+config_dir = Path(__file__).parent.parent / 'config'
+sys.path.insert(0, str(config_dir))
+from config import get_config
 
 class OpenAIModel:
     def __init__(self, prompt_template="{input_text}"):
-        self.api_key = os.environ["OPENAI_API_KEY"]
+        # Use centralized config for OpenAI API key
+        self._config = get_config()
+        self.api_key = self._config.get("openai_api_key") or os.environ.get("OPENAI_API_KEY")
+        if not self.api_key:
+            raise ValueError("OpenAI API key not found in config or environment variables")
         openai.api_key = self.api_key
         self.prompt_template = prompt_template
 

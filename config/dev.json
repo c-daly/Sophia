@@ -1,5 +1,12 @@
 {
+  "debug": true,
+  "log_level": "DEBUG",
+  "memory_backend": "standard",
   "tool_registry": [],
-  "debug": true
+  "mongo_url": "mongodb://localhost:27017/sophia_dev",
+  "neo4j_uri": "bolt://localhost:7687",
+  "milvus_host": "localhost",
+  "milvus_port": "19530",
+  "milvus_collection": "sophia_dev"
 }
 

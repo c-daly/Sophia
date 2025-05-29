@@ -9,7 +9,13 @@ agents implemented using the stateful agent framework.
 import argparse
 import sys
 from typing import Dict, Any, Callable
+from pathlib import Path
 
+# Add the config directory to sys.path to import the config module
+config_dir = Path(__file__).parent / 'config'
+sys.path.insert(0, str(config_dir))
+
+from config import get_config
 from agents.stateful_conversational_agent import StatefulConversationalAgent
 from agents.tool_agent import create_calculator_agent
 from agents.agent_loop import AgentLoop
@@ -30,8 +36,10 @@ def get_available_agents() -> Dict[str, Callable[[], AbstractAgent]]:
 
 def main():
     """Run the CLI driver."""
-    # Set up command-line arguments
+    # Set up command-line arguments - include both CLI driver and config args
     parser = argparse.ArgumentParser(description="Stateful Agent Framework CLI Driver")
+    
+    # CLI driver specific arguments
     parser.add_argument(
         "--agent", "-a",
         choices=list(get_available_agents().keys()),
@@ -50,7 +58,24 @@ def main():
         help="Initial input for the agent"
     )
     
+    # Configuration arguments (add config args to the main parser)
+    parser.add_argument("--env", type=str, help="Environment (dev/test/prod)")
+    parser.add_argument("--config", type=str, help="Path to config override JSON")
+    parser.add_argument("--memory", type=str, help="Override memory backend")
+    parser.add_argument("--debug", action="store_true", help="Enable debug mode")
+    parser.add_argument("--log-level", type=str, help="Override log level")
+    parser.add_argument("--mongo-url", type=str, help="Override MongoDB URL")
+    parser.add_argument("--neo4j-uri", type=str, help="Override Neo4j URI")
+    
     args = parser.parse_args()
+    
+    # Initialize config with parsed arguments
+    config = get_config(args)
+    
+    # Log the current configuration if debug is enabled
+    if config.get("debug"):
+        config.logger.debug(f"Running in {config.get_environment()} environment")
+        config.logger.debug(f"Configuration: {config.get_all()}")
     
     # Create the selected agent
     agent_factory = get_available_agents()[args.agent]

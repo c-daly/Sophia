@@ -1,0 +1,11 @@
+{
+  "debug": false,
+  "log_level": "INFO",
+  "memory_backend": "standard",
+  "tool_registry": [],
+  "mongo_url": "mongodb://mongodb:27017/sophia",
+  "neo4j_uri": "bolt://neo4j:7687",
+  "milvus_host": "milvus",
+  "milvus_port": "19530",
+  "milvus_collection": "sophia"
+}
