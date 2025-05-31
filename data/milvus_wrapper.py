@@ -1,13 +1,23 @@
 import config
+import sys
+from pathlib import Path
+
+# Add the config directory to sys.path to import the config module
+config_dir = Path(__file__).parent.parent / 'config'
+sys.path.insert(0, str(config_dir))
+from config import get_config
 from pymilvus import Milvus, DataType, IndexType, CollectionSchema, FieldSchema, connections, Collection, utility
+
 class MilvusWrapper:
     # This connection needs to be made lazy
-    def __init__(self, host='standalone', port='19530', collection_name='sophia'):
+    def __init__(self, host=None, port=None, collection_name=None):
+        # Use centralized config for default values
+        self._config = get_config()
         self.connected = False
-        self.collection_name = collection_name
+        self.collection_name = collection_name or self._config.get("milvus_collection", "sophia")
         self.collection = None
-        self.port = port
-        self.host = host
+        self.port = port or self._config.get("milvus_port", "19530")
+        self.host = host or self._config.get("milvus_host", "standalone")
 
     def make_connection(self):
         connections.connect(host=self.host, port=self.port)

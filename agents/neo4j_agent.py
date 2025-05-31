@@ -9,8 +9,17 @@ from data.neo4j_wrapper import Neo4jWrapper
 from memory.kg_memory import KGMemory
 from prompts.prompts import DEFAULT_PROMPT, SUMMARY_PROMPT
 import os
+import sys
+from pathlib import Path
 
-NEO4J_URI = os.getenv("NEO4J_URI")
+# Add the config directory to sys.path to import the config module
+config_dir = Path(__file__).parent.parent / 'config'
+sys.path.insert(0, str(config_dir))
+from config import get_config
+
+# Use centralized config for Neo4j URI
+_config = get_config()
+NEO4J_URI = _config.get("neo4j_uri")
 PROMPT = "You are a sophisticated agent with a deep understanding of the world. You can answer questions and provide explanations. You can also ask questions and provide explanations.\nExisting knowledge is stored here: {existing_knowledge}"
 
 class Neo4jAgent(AbstractAgent):
