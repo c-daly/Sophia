@@ -47,18 +47,31 @@ Key components:
 Represents the next action an agent plans to take:
 
 ```python
+# Using helper methods (recommended)
+action = AgentAction.respond("I'll help you with that.")
+
+# Or directly with payload
 action = AgentAction(
     type=ActionType.RESPOND,
-    content="I'll help you with that."
+    payload={"content": "I'll help you with that."}
 )
 ```
 
-Action types include:
-- `RESPOND`: Generate a text response
-- `TOOL_CALL`: Execute a tool
-- `DELEGATE`: Hand off to another agent
-- `COMPLETE`: End the conversation
-- `PENDING`: No action determined yet
+Action types and their expected payload structure:
+- `RESPOND`: `{"content": str}` - Generate a text response
+- `TOOL_CALL`: `{"tool_call": ToolCall}` - Execute a tool
+- `DELEGATE`: `{"delegate_to": str}` - Hand off to another agent
+- `COMPLETE`: `{}` - End the conversation
+- `PENDING`: `{}` - No action determined yet
+
+Helper methods are available for creating each type of action:
+```python
+AgentAction.respond("Hello there")
+AgentAction.tool_call(ToolCall(name="calculator", parameters={"expression": "2+2"}))
+AgentAction.delegate("math_agent")
+AgentAction.complete()
+AgentAction.pending()
+```
 
 #### AgentResponse
 

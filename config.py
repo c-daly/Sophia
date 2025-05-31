@@ -11,9 +11,13 @@ import logging
 # Note: Due to import path conflicts, some modules should migrate to direct config imports
 
 # Create a basic logger for backward compatibility
+# milvus takes forever to load
+milvus = None
+mongo = None # MongoWrapper()
 logger = logging.getLogger('sophia')
 handler = logging.StreamHandler()
 formatter = logging.Formatter('%(message)s')
+handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
@@ -35,3 +39,4 @@ try:
 except Exception:
     # If mongo fails to initialize, leave it as None
     pass
+debug = False

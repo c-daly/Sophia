@@ -6,20 +6,7 @@ from agents.agent_interfaces import AgentState, AgentInput, AgentResponse
 
 # Abstract base class for an agent
 class AbstractAgent(ABC):
-
-    @abstractmethod
-    def generate_query_sequence(self, text):
-        """
-        Legacy method for backward compatibility.
-        
-        Args:
-            text: The input text to process
-            
-        Returns:
-            The response text or object
-        """
-        pass
-    
+   
     @abstractmethod
     def start(self, input_content: str, **metadata) -> AgentResponse:
         """

@@ -16,7 +16,7 @@ sys.modules['data.milvus_wrapper'] = MagicMock()
 sys.modules['prompts.prompts'] = MagicMock(DEFAULT_PROMPT="You are a helpful assistant")
 
 from agents.agent_interfaces import (
-    AgentState, AgentInput, AgentResponse, AgentAction, ActionType, Message
+    AgentState, AgentInput, AgentResponse, AgentAction, ActionType, Message, ToolCall
 )
 from agents.tool_agent import ToolAgent, calculator_tool
 
@@ -42,6 +42,63 @@ class TestAgentInterfaces(unittest.TestCase):
         last_msg = state.get_last_message()
         self.assertEqual(last_msg.role, "user")
         self.assertEqual(last_msg.content, "User message")
+    
+    def test_agent_action_respond(self):
+        """Test AgentAction.respond helper method."""
+        action = AgentAction.respond("Hello, world!")
+        self.assertEqual(action.type, ActionType.RESPOND)
+        self.assertEqual(action.payload["content"], "Hello, world!")
+        self.assertEqual(action.metadata, {})
+        
+        # With metadata
+        action = AgentAction.respond("Hello, world!", source="user-query")
+        self.assertEqual(action.metadata["source"], "user-query")
+    
+    def test_agent_action_tool_call(self):
+        """Test AgentAction.tool_call helper method."""
+        tool_call = ToolCall(name="calculator", parameters={"expression": "2+2"})
+        action = AgentAction.tool_call(tool_call)
+        self.assertEqual(action.type, ActionType.TOOL_CALL)
+        self.assertEqual(action.payload["tool_call"], tool_call)
+        
+    def test_agent_action_delegate(self):
+        """Test AgentAction.delegate helper method."""
+        action = AgentAction.delegate("math_agent")
+        self.assertEqual(action.type, ActionType.DELEGATE)
+        self.assertEqual(action.payload["delegate_to"], "math_agent")
+        
+    def test_agent_action_complete(self):
+        """Test AgentAction.complete helper method."""
+        action = AgentAction.complete()
+        self.assertEqual(action.type, ActionType.COMPLETE)
+        self.assertEqual(action.payload, {})
+        
+    def test_agent_action_pending(self):
+        """Test AgentAction.pending helper method."""
+        action = AgentAction.pending()
+        self.assertEqual(action.type, ActionType.PENDING)
+        self.assertEqual(action.payload, {})
+    
+    def test_agent_action_backward_compatibility(self):
+        """Test backward compatibility of AgentAction payload with old attributes."""
+        # Create action using the new payload approach
+        action = AgentAction.respond("Hello, world!")
+        
+        # Verify that the payload is accessible directly via attribute access
+        # This ensures backward compatibility with code that expects direct attributes
+        self.assertEqual(action.content, "Hello, world!")
+        self.assertEqual(action.payload["content"], "Hello, world!")
+        
+        # Test tool_call
+        tool_call = ToolCall(name="calculator", parameters={"expression": "2+2"})
+        action = AgentAction.tool_call(tool_call)
+        self.assertEqual(action.tool_call_data, tool_call)
+        self.assertEqual(action.payload["tool_call"], tool_call)
+        
+        # Test delegate
+        action = AgentAction.delegate("math_agent")
+        self.assertEqual(action.delegate_to, "math_agent")
+        self.assertEqual(action.payload["delegate_to"], "math_agent")
 
 
 class TestToolFunctionality(unittest.TestCase):

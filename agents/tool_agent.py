@@ -110,10 +110,7 @@ class ToolAgent(AbstractAgent):
             
             # Update the state with the result
             state.add_message("tool", result_str)
-            state.next_action = AgentAction(
-                type=ActionType.RESPOND,
-                content=result_str
-            )
+            state.next_action = AgentAction.respond(result_str)
             
             return AgentResponse(
                 state=state,
