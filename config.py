@@ -25,6 +25,13 @@ logger.setLevel(logging.DEBUG)
 milvus = None
 mongo = None
 
+def get_config(args):
+    """Get the configuration dictionary."""
+    return {
+        "debug": args.debug,
+        "logger": logger,
+            }
+
 def get_mongo():
     """Get the MongoDB wrapper instance."""
     global mongo

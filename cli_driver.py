@@ -54,11 +54,11 @@ def main():
         action="store_true",
         help="Run in interactive mode"
     )    
-    parser.add_argument(
-        "--debug", "-d",
-        action="store_true",
-        help="Run in debug mode"
-    )
+    #parser.add_argument(
+    #    "--debug", "-d",
+    #    action="store_true",
+    #    help="Run in debug mode"
+    #)
  
     parser.add_argument(
         "input",
@@ -71,7 +71,7 @@ def main():
     parser.add_argument("--env", type=str, help="Environment (dev/test/prod)")
     parser.add_argument("--config", type=str, help="Path to config override JSON")
     parser.add_argument("--memory", type=str, help="Override memory backend")
-    parser.add_argument("--debug", action="store_true", help="Enable debug mode")
+    parser.add_argument("--debug", "-d", action="store_true", help="Enable debug mode")
     parser.add_argument("--log-level", type=str, help="Override log level")
     parser.add_argument("--mongo-url", type=str, help="Override MongoDB URL")
     parser.add_argument("--neo4j-uri", type=str, help="Override Neo4j URI")
