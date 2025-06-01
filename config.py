@@ -12,6 +12,33 @@ env = "dev"
 
 log_init = False
 
+class Configurator:
+    """Configurator class to manage configurations."""
+
+    def __init__(self, env_name='dev'):
+        self.env_name = env_name
+        self.config = self.load_config(env_name)
+        self.logger = self.init_logger(name='sophia', log_level=logging.DEBUG)
+
+    def load_config(self, env_name):
+        """Load the configuration from a file."""
+        #try:
+        #    with open(f'config/{env_name}.json', 'r') as f:
+        #        return json.load(f)
+        #except FileNotFoundError:
+        #    raise FileNotFoundError(f"Configuration file for environment '{env_name}' not found.")
+        pass
+
+    def init_logger(self, name='sophia', log_level=logging.DEBUG):
+        """Get a logger instance."""
+        logger = logging.getLogger(name)
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('%(message)s')
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(log_level)
+        return logger
+
 def get_config(args):
     """Get the configuration dictionary."""
     return {
@@ -40,19 +67,4 @@ def get_mongo():
 def get_environment():
     """"Get the environment configuration."""
     return env
-
-def get_logger(name='sophia', log_level=logging.DEBUG):
-    if log_init == False:
-        logger = logging.getLogger('sophia')
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(message)s')
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-        logger.setLevel(logging.DEBUG)
-        log_init = True
-    else:
-        return logger
-
-    return logger
-
 

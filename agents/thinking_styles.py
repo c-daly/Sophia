@@ -106,16 +106,16 @@ def _reactive(llm_chat, state, cfg) -> AgentResponse:
         {"role": "user", "content": state.input.content},
     ]
 
-    if config.debug:
-        print(f"User message: {state.input.content}")
+    #if config.debug:
+    #    print(f"User message: {state.input.content}")
 
     for _ in range(cfg.max_iterations):
         assistant = llm_chat.generate_response(messages)
         assistant = assistant.output.strip()
         messages.append({"role": "assistant", "content": assistant})
 
-        if config.debug:
-            print(f"LLM response: {assistant}")
+        #if config.debug:
+        #    print(f"LLM response: {assistant}")
 
         # finished?
         if assistant.startswith("FINAL:"):
@@ -157,8 +157,8 @@ def _reflective(llm_chat, state, cfg) -> AgentResponse:
     draft = draft.output
     answer = draft.split("⧉ANSWER⧉")[-1].strip()
 
-    if config.debug:
-        print(f"Draft answer: {answer}")
+    #if config.debug:
+    #    print(f"Draft answer: {answer}")
 
     # 2) Critique
     critique = llm_chat.generate_response(
@@ -171,8 +171,8 @@ def _reflective(llm_chat, state, cfg) -> AgentResponse:
     )
 
     critique = critique.output_text.strip()
-    if config.debug:
-        print(f"Critique: {critique}")
+    #if config.debug:
+    #    print(f"Critique: {critique}")
 
 
     # 3) Optional revision

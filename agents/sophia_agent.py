@@ -64,8 +64,6 @@ class SophiaAgent(AbstractAgent):
             thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REACTIVE, max_iterations=3, cot=thinking_styles.CoTVisibility.EXPOSE)
             response = thinking_styles.think(self.model, state, thinking_config)
 
-            if config.debug:
-                print(f"Agent response: {response.output}")
 
             response_text = response.output
             

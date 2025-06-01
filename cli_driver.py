@@ -11,7 +11,7 @@ import sys
 from typing import Dict, Any, Callable
 from pathlib import Path
 import config
-from config import get_config, get_environment
+from config import Configurator, get_config, get_environment
 from agents.stateful_conversational_agent import StatefulConversationalAgent
 from agents.tool_agent import create_calculator_agent
 from agents.agent_loop import AgentLoop
@@ -71,10 +71,11 @@ def main():
     
     # Initialize config with parsed arguments
     cfg = get_config(args)
-    logger = config.get_logger()    
+    configurator = Configurator()
+    logger = configurator.logger
     # Log the current configuration if debug is enabled
-    if config.get("debug"):
-        logger.debug(f"Running in {get_environment()} environment")
+    if cfg.get("debug"):
+        configurator.logger.debug(f"Running in {get_environment()} environment")
     
     # Create the selected agent
     agent_factory = get_available_agents()[args.agent]
@@ -84,7 +85,7 @@ def main():
     loop = AgentLoop(agent)
     
     if args.debug:
-        config['debug'] = True
+        cfg['debug'] = True
         print("Debug mode enabled. Agent state will be printed after each interaction.")
     if args.interactive:
         # Interactive mode
