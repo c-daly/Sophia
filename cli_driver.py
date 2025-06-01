@@ -15,13 +15,12 @@ from pathlib import Path
 config_dir = Path(__file__).parent / 'config'
 sys.path.insert(0, str(config_dir))
 
-from config import get_config
+from config import get_config, get_environment
 from agents.stateful_conversational_agent import StatefulConversationalAgent
 from agents.tool_agent import create_calculator_agent
 from agents.agent_loop import AgentLoop
 from agents.abstract_agent import AbstractAgent
 from agents.sophia_agent import SophiaAgent
-import config
 
 def get_available_agents() -> Dict[str, Callable[[], AbstractAgent]]:
     """
@@ -83,8 +82,7 @@ def main():
     
     # Log the current configuration if debug is enabled
     if config.get("debug"):
-        config.logger.debug(f"Running in {config.get_environment()} environment")
-        config.logger.debug(f"Configuration: {config.get_all()}")
+        config.get("logger").debug(f"Running in {get_environment()} environment")
     
     # Create the selected agent
     agent_factory = get_available_agents()[args.agent]
@@ -94,7 +92,7 @@ def main():
     loop = AgentLoop(agent)
     
     if args.debug:
-        config.debug = True
+        config['debug'] = True
         print("Debug mode enabled. Agent state will be printed after each interaction.")
     if args.interactive:
         # Interactive mode

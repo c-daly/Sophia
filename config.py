@@ -1,11 +1,9 @@
 """
-Backward compatibility layer for the old config.py interface.
-
-This module provides a same interface as the old config.py but uses
-the new centralized configuration system under the hood.
+Centralized configuration module for the Sophia project.
 """
 
 import logging
+import json
 
 # For backward compatibility, provide the essential components
 # Note: Due to import path conflicts, some modules should migrate to direct config imports
@@ -20,6 +18,7 @@ formatter = logging.Formatter('%(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
+env = "dev"
 
 # Placeholder for milvus and mongo - will be initialized lazily
 milvus = None
@@ -32,6 +31,20 @@ def get_config(args):
         "logger": logger,
             }
 
+def load_config(env_name):
+    """ Load the config from env specific configuration file. """
+    # load config/dev.json
+    try:
+        with open(f'config/{env}.json', 'r') as f:
+            config = json.load(f)
+        return config
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Configuration file for environment '{env_name}' not found.")
+
+def get_logger():
+    """Get the logger instance."""
+    return logger
+
 def get_mongo():
     """Get the MongoDB wrapper instance."""
     global mongo
@@ -40,10 +53,7 @@ def get_mongo():
         mongo = MongoWrapper()
     return mongo
 
-# Initialize mongo for immediate backward compatibility
-try:
-    mongo = get_mongo()
-except Exception:
-    # If mongo fails to initialize, leave it as None
-    pass
-debug = False
+def get_environment():
+    """"Get the environment configuration."""
+    return env
+
