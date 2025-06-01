@@ -5,24 +5,12 @@ Centralized configuration module for the Sophia project.
 import logging
 import json
 
-# For backward compatibility, provide the essential components
-# Note: Due to import path conflicts, some modules should migrate to direct config imports
-
-# Create a basic logger for backward compatibility
-# milvus takes forever to load
 milvus = None
 mongo = None # MongoWrapper()
-logger = logging.getLogger('sophia')
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
+logger = None
 env = "dev"
 
-# Placeholder for milvus and mongo - will be initialized lazily
-milvus = None
-mongo = None
+log_init = False
 
 def get_config(args):
     """Get the configuration dictionary."""
@@ -41,10 +29,6 @@ def load_config(env_name):
     except FileNotFoundError:
         raise FileNotFoundError(f"Configuration file for environment '{env_name}' not found.")
 
-def get_logger():
-    """Get the logger instance."""
-    return logger
-
 def get_mongo():
     """Get the MongoDB wrapper instance."""
     global mongo
@@ -56,4 +40,19 @@ def get_mongo():
 def get_environment():
     """"Get the environment configuration."""
     return env
+
+def get_logger(name='sophia', log_level=logging.DEBUG):
+    if log_init == False:
+        logger = logging.getLogger('sophia')
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('%(message)s')
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.DEBUG)
+        log_init = True
+    else:
+        return logger
+
+    return logger
+
 

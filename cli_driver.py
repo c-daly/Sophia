@@ -10,11 +10,7 @@ import argparse
 import sys
 from typing import Dict, Any, Callable
 from pathlib import Path
-
-# Add the config directory to sys.path to import the config module
-config_dir = Path(__file__).parent / 'config'
-sys.path.insert(0, str(config_dir))
-
+import config
 from config import get_config, get_environment
 from agents.stateful_conversational_agent import StatefulConversationalAgent
 from agents.tool_agent import create_calculator_agent
@@ -22,6 +18,7 @@ from agents.agent_loop import AgentLoop
 from agents.abstract_agent import AbstractAgent
 from agents.sophia_agent import SophiaAgent
 
+logger = None
 def get_available_agents() -> Dict[str, Callable[[], AbstractAgent]]:
     """
     Get a dictionary of available agent factories.
@@ -53,11 +50,6 @@ def main():
         action="store_true",
         help="Run in interactive mode"
     )    
-    #parser.add_argument(
-    #    "--debug", "-d",
-    #    action="store_true",
-    #    help="Run in debug mode"
-    #)
  
     parser.add_argument(
         "input",
@@ -78,11 +70,11 @@ def main():
     args = parser.parse_args()
     
     # Initialize config with parsed arguments
-    config = get_config(args)
-    
+    cfg = get_config(args)
+    logger = config.get_logger()    
     # Log the current configuration if debug is enabled
     if config.get("debug"):
-        config.get("logger").debug(f"Running in {get_environment()} environment")
+        logger.debug(f"Running in {get_environment()} environment")
     
     # Create the selected agent
     agent_factory = get_available_agents()[args.agent]
