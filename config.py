@@ -1,12 +1,12 @@
 """
-Centralized configuration module for the Sophia project.
+config.py
+This module provides configuration management for the application.
 """
-
 import logging
 import json
 
 milvus = None
-mongo = None # MongoWrapper()
+mongo = None
 logger = None
 env = "dev"
 
@@ -29,8 +29,15 @@ class Configurator:
         #    raise FileNotFoundError(f"Configuration file for environment '{env_name}' not found.")
         pass
 
-    def init_logger(self, name='sophia', log_level=logging.DEBUG):
-        """Get a logger instance."""
+    def init_logger(self, name='sophia', log_level=logging.DEBUG) -> logging.Logger:
+        """
+        Initialize and return a logger instance.
+        Args:
+            name (str): Name of the logger.
+            log_level (int): Logging level.
+        Returns:
+            logging.Logger: Configured logger instance.
+        """
         logger = logging.getLogger(name)
         handler = logging.StreamHandler()
         formatter = logging.Formatter('%(message)s')

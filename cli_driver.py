@@ -39,9 +39,7 @@ def main():
     parser = argparse.ArgumentParser(description="Stateful Agent Framework CLI Driver")
     
     # CLI driver specific arguments
-    parser.add_argument(
-        "--agent", "-a",
-        choices=list(get_available_agents().keys()),
+    parser.add_argument("--agent", "-a",choices=list(get_available_agents().keys()),
         default="conversational",
         help="The type of agent to use"
     )
@@ -86,7 +84,7 @@ def main():
     
     if args.debug:
         cfg['debug'] = True
-        print("Debug mode enabled. Agent state will be printed after each interaction.")
+
     if args.interactive:
         # Interactive mode
         if args.input:

@@ -2,11 +2,12 @@
 thinking_styles.py
 ──────────────────
 Central place for every “how-to-think” strategy Sophia can use.
-Each strategy is a pure function: (model, state, cfg) -> str  (final answer).
 
-'state' is deliberately opaque: it just needs '.user_msg'  and a
-'.tool_runner(name, args) -> Any' callable if you let reactive use tools.
-You can pass in your full ConversationState object.
+This module defines various thinking styles that Sophia can use to process user input and generate responses.
+It includes strategies like:
+- Reflex: A single-pass response generation.
+- Reactive: A ReAct loop that allows for tool invocation and observation.
+- Reflective: A multi-step process involving drafting, self-critique, and optional revision.
 """
 
 from __future__ import annotations
