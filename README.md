@@ -68,7 +68,7 @@ Conceptually, LOGOS reflects the view that Sophia is ultimately a composable gra
 > Used for real-world integration (robotics, IoT, simulation, etc.).
 
 **Sophia’s connection:**
-Talos lets Sophia interact with environments, receive sensory data, and present multimodally.
+Talos lets Sophia interact with environments. Sensors and motors allow for perception and navigation.
 
 ---
 
