@@ -19,6 +19,8 @@ from agents.agent_interfaces import (
     AgentState, AgentInput, AgentResponse, AgentAction, ActionType, Message, ToolCall
 )
 from agents.tool_agent import ToolAgent, calculator_tool
+from agents.agent_loop import AgentLoop
+from tools.registry import get_registry
 
 
 class TestAgentInterfaces(unittest.TestCase):
@@ -121,6 +123,118 @@ class TestToolFunctionality(unittest.TestCase):
         # Test with whitespace
         result = calculator_tool(" 7 - 3 ")
         self.assertEqual(result, 4)
+
+
+class TestAgentLoopWithToolRegistry(unittest.TestCase):
+    """Tests for AgentLoop integration with the dynamic tool registry."""
+    
+    def setUp(self):
+        """Set up test fixtures."""
+        # Clear the registry before each test
+        self.registry = get_registry()
+        self.registry.clear()
+        
+        # Create a mock agent for testing
+        self.mock_agent = MagicMock()
+        self.agent_loop = AgentLoop(self.mock_agent)
+    
+    def test_agent_loop_uses_dynamic_registry(self):
+        """Test that AgentLoop can use tools from the dynamic registry."""
+        # Register a test tool
+        def test_tool(message: str) -> str:
+            return f"Tool response: {message}"
+        
+        self.registry.register("test_tool", test_tool, "A test tool")
+        
+        # Check that the tool is available
+        self.assertIn("test_tool", self.agent_loop.get_available_tools())
+        
+        # Verify tool metadata
+        metadata = self.agent_loop.get_tool_metadata()
+        self.assertIn("test_tool", metadata)
+        self.assertEqual(metadata["test_tool"]["description"], "A test tool")
+    
+    def test_agent_loop_legacy_compatibility(self):
+        """Test that AgentLoop maintains compatibility with legacy tool registry."""
+        # Add a legacy tool
+        def legacy_tool(x: int) -> int:
+            return x * 2
+        
+        self.agent_loop.register_legacy_tool("legacy_tool", legacy_tool)
+        
+        # Check availability
+        self.assertIn("legacy_tool", self.agent_loop.get_available_tools())
+        
+        # Check metadata includes legacy tools
+        metadata = self.agent_loop.get_tool_metadata()
+        self.assertIn("legacy_tool", metadata)
+        self.assertEqual(metadata["legacy_tool"]["tags"], ["legacy"])
+    
+    def test_agent_loop_tool_execution(self):
+        """Test that AgentLoop can execute tools properly."""
+        # Register a simple tool
+        def echo_tool(message: str) -> str:
+            return f"Echo: {message}"
+        
+        self.registry.register("echo", echo_tool)
+        
+        # Create a mock agent response with a tool call
+        mock_state = AgentState()
+        tool_call = ToolCall(name="echo", parameters={"message": "hello"})
+        mock_state.next_action = AgentAction.tool_call(tool_call)
+        
+        mock_response = AgentResponse(state=mock_state, output="", is_done=False)
+        self.mock_agent.step.return_value = mock_response
+        
+        # Execute the step
+        result = self.agent_loop.run_single_step(mock_state)
+        
+        # Verify tool was executed and result was added to history
+        self.assertEqual(len(result.state.history), 1)
+        self.assertEqual(result.state.history[0].role, "tool")
+        self.assertEqual(result.state.history[0].content, "Echo: hello")
+    
+    def test_agent_loop_tool_error_handling(self):
+        """Test that AgentLoop handles tool errors gracefully."""
+        # Register a tool that raises an error
+        def error_tool() -> str:
+            raise ValueError("Tool error")
+        
+        self.registry.register("error_tool", error_tool)
+        
+        # Create a mock agent response with a tool call
+        mock_state = AgentState()
+        tool_call = ToolCall(name="error_tool", parameters={})
+        mock_state.next_action = AgentAction.tool_call(tool_call)
+        
+        mock_response = AgentResponse(state=mock_state, output="", is_done=False)
+        self.mock_agent.step.return_value = mock_response
+        
+        # Execute the step
+        result = self.agent_loop.run_single_step(mock_state)
+        
+        # Verify error was handled
+        self.assertEqual(len(result.state.history), 1)
+        self.assertEqual(result.state.history[0].role, "system")
+        self.assertIn("Error executing tool error_tool", result.state.history[0].content)
+    
+    def test_agent_loop_missing_tool_handling(self):
+        """Test that AgentLoop handles missing tools gracefully."""
+        # Create a mock agent response with a tool call for non-existent tool
+        mock_state = AgentState()
+        tool_call = ToolCall(name="nonexistent_tool", parameters={})
+        mock_state.next_action = AgentAction.tool_call(tool_call)
+        
+        mock_response = AgentResponse(state=mock_state, output="", is_done=False)
+        self.mock_agent.step.return_value = mock_response
+        
+        # Execute the step
+        result = self.agent_loop.run_single_step(mock_state)
+        
+        # Verify error was handled
+        self.assertEqual(len(result.state.history), 1)
+        self.assertEqual(result.state.history[0].role, "system")
+        self.assertIn("Tool 'nonexistent_tool' not found", result.state.history[0].content)
 
 
 if __name__ == "__main__":

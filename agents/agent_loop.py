@@ -10,6 +10,7 @@ import time
 
 from agents.abstract_agent import AbstractAgent
 from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, ActionType, ToolCall
+from tools.registry import ToolRegistry, get_registry
 
 
 class AgentLoop:
@@ -23,7 +24,8 @@ class AgentLoop:
     def __init__(
         self, 
         agent: AbstractAgent,
-        tool_registry: Optional[Dict[str, Callable]] = None,
+        tool_registry: Optional[ToolRegistry] = None,
+        legacy_tool_registry: Optional[Dict[str, Callable]] = None,
         max_turns: int = 10
     ):
         """
@@ -31,11 +33,13 @@ class AgentLoop:
         
         Args:
             agent: The agent to run in this loop
-            tool_registry: A mapping of tool names to functions
+            tool_registry: A ToolRegistry instance (uses global registry if None)
+            legacy_tool_registry: A mapping of tool names to functions (for backward compatibility)
             max_turns: Maximum number of turns to prevent infinite loops
         """
         self.agent = agent
-        self.tool_registry = tool_registry or {}
+        self.tool_registry = tool_registry or get_registry()
+        self.legacy_tool_registry = legacy_tool_registry or {}
         self.max_turns = max_turns
     
     def start(self, input_content: str, **metadata) -> AgentResponse:
@@ -69,8 +73,15 @@ class AgentLoop:
             # Execute the tool call
             tool_call = response.state.next_action.payload["tool_call"]
             tool_name = tool_call.name
-            if tool_name in self.tool_registry:
-                tool_function = self.tool_registry[tool_name]
+            
+            # First try the dynamic registry
+            tool_function = self.tool_registry.get_tool(tool_name)
+            
+            # Fall back to legacy registry for backward compatibility
+            if tool_function is None and tool_name in self.legacy_tool_registry:
+                tool_function = self.legacy_tool_registry[tool_name]
+            
+            if tool_function is not None:
                 try:
                     result = tool_function(**tool_call.parameters)
                     # Record the tool result in history
@@ -157,3 +168,47 @@ class AgentLoop:
             print(f"Agent: {response.output}")
             
             turn_count += 1
+
+    def get_available_tools(self) -> List[str]:
+        """
+        Get a list of all available tools.
+        
+        Returns:
+            List of tool names from both dynamic and legacy registries
+        """
+        dynamic_tools = self.tool_registry.list_tools()
+        legacy_tools = list(self.legacy_tool_registry.keys())
+        return dynamic_tools + [tool for tool in legacy_tools if tool not in dynamic_tools]
+    
+    def get_tool_metadata(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Get metadata for all available tools.
+        
+        Returns:
+            Dictionary mapping tool names to their metadata
+        """
+        metadata = self.tool_registry.list_tools_with_metadata()
+        
+        # Add legacy tools with basic metadata
+        for tool_name, tool_func in self.legacy_tool_registry.items():
+            if tool_name not in metadata:
+                metadata[tool_name] = {
+                    "name": tool_name,
+                    "description": getattr(tool_func, '__doc__', '') or f"Legacy tool: {tool_name}",
+                    "parameters": {},
+                    "tags": ["legacy"],
+                    "version": "unknown",
+                    "module": getattr(tool_func, '__module__', '')
+                }
+        
+        return metadata
+    
+    def register_legacy_tool(self, name: str, function: Callable):
+        """
+        Register a tool using the legacy interface.
+        
+        Args:
+            name: Tool name
+            function: Tool function
+        """
+        self.legacy_tool_registry[name] = function

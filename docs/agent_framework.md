@@ -8,6 +8,7 @@ The Sophia Stateful Agent Framework provides a flexible, extensible architecture
 2. **State tracking** via the `AgentState` object
 3. **Composable design** with unified agent and tool interfaces
 4. **Action-based processing** for responding, tool use, and delegation
+5. **Dynamic tool registry** for automatic tool discovery and hot-swapping
 
 ## Core Components
 
@@ -18,6 +19,18 @@ All agents implement the `AbstractAgent` interface which provides:
 - `start(input_content, **metadata)`: Initialize a new agent session
 - `step(state)`: Process a single turn in the conversation
 - `generate_query_sequence(text)`: Legacy method for backward compatibility
+
+### Dynamic Tool Registry
+
+The framework includes a sophisticated tool registry system that provides:
+
+- **Automatic Discovery**: Tools are registered automatically when modules are imported
+- **Decorator Pattern**: Use `@register_tool` to mark functions as tools
+- **Hot-swapping**: Replace tool implementations at runtime
+- **Rich Metadata**: Automatic parameter extraction and tool descriptions
+- **Thread Safety**: Concurrent access support
+
+See the [Dynamic Tool Registry](tool_registry.md) documentation for detailed information.
 
 ### Data Structures
 
@@ -87,11 +100,20 @@ response = AgentResponse(
 
 ## Agent Loop
 
-The `AgentLoop` class manages the execution flow for stateful agents:
+The `AgentLoop` class manages the execution flow for stateful agents and integrates with the dynamic tool registry:
 
 ```python
+from agents.agent_loop import AgentLoop
+from tools.registry import register_tool
+
+# Register tools using the decorator
+@register_tool(name="calculator", description="Performs calculations")
+def calculator(expression: str) -> float:
+    return eval(expression)
+
+# AgentLoop automatically uses the global tool registry
 agent = StatefulConversationalAgent()
-loop = AgentLoop(agent, tool_registry={"calculator": calculator_fn})
+loop = AgentLoop(agent)
 
 # Interactive conversation
 loop.run_interactive("Hello")
@@ -101,6 +123,20 @@ response = loop.run_single_step(state)
 
 # Run until completion
 final_response = loop.run_until_done("Solve 2+2")
+
+# Access available tools
+available_tools = loop.get_available_tools()
+tool_metadata = loop.get_tool_metadata()
+```
+
+### Legacy Tool Support
+
+For backward compatibility, you can still provide tools via dictionary:
+
+```python
+# Legacy approach (still supported)
+legacy_tools = {"old_tool": old_tool_function}
+loop = AgentLoop(agent, legacy_tool_registry=legacy_tools)
 ```
 
 ## Creating Custom Agents
@@ -177,11 +213,39 @@ For existing agents:
 1. Keep the `generate_query_sequence` method for backward compatibility
 2. Add the new lifecycle methods `start()` and `step()`
 3. Convert internal state to use `AgentState`
+4. Migrate tools to use the dynamic tool registry with `@register_tool`
+
+### Tool Migration
+
+Convert existing tools to use the new registry:
+
+```python
+# Old tool class
+class CalculatorTool(AbstractTool):
+    def run(self, expression):
+        return eval(expression)
+    
+    def get_name(self):
+        return "calculator"
+
+# New registered function
+@register_tool(
+    name="calculator",
+    description="Evaluates mathematical expressions",
+    tags=["math", "utility"]
+)
+def calculator_tool(expression: str) -> float:
+    """Safely evaluate a mathematical expression."""
+    return eval(expression)
+```
 
 ## Best Practices
 
 1. Keep agents stateless, with all session data in `AgentState`
 2. Use `working_memory` for transient data within a session
 3. Design agents to handle a single step at a time
-4. Use `tool_registry` for external functionality
+4. Use the dynamic tool registry with `@register_tool` for external functionality
 5. Return meaningful output in `AgentResponse`
+6. Include comprehensive tool metadata for better discoverability
+7. Use tags to categorize tools for easy filtering
+8. Implement proper error handling in tools
