@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from communication.generic_response import GenericResponse
 from typing import Optional, Dict, Any, List, Union
 
 from agents.agent_interfaces import AgentState, AgentInput, AgentResponse
@@ -8,7 +9,7 @@ from agents.agent_interfaces import AgentState, AgentInput, AgentResponse
 class AbstractAgent(ABC):
    
     @abstractmethod
-    def start(self, input_content: str, **metadata) -> AgentResponse:
+    def start(self, input_content: str, **metadata) -> GenericResponse:
         """
         Start a new agent session with the given input.
         
@@ -22,7 +23,7 @@ class AbstractAgent(ABC):
         pass
     
     @abstractmethod
-    def step(self, state: AgentState) -> AgentResponse:
+    def step(self, state: AgentState) -> GenericResponse:
         """
         Process a single step in the agent's lifecycle.
         

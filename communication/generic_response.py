@@ -1,6 +1,10 @@
+from agents.agent_interfaces import AgentState
 """
 Class for standardizing responses in the Sophia app
 """
 class GenericResponse:
-    def __init__(self, success: bool, message: str = None, data: dict = None):
-        throw notImplementedError("This class is not implemented yet")
+    def __init__(self, state: AgentState, output: str = ""):
+        self.output = output
+        self.state = state
+        self.is_done = False
+

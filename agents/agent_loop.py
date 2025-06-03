@@ -10,6 +10,8 @@ import time
 
 from agents.abstract_agent import AbstractAgent
 from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, ActionType, ToolCall
+from communication.generic_response import GenericResponse
+from communication.generic_request import GenericRequest
 
 
 class AgentLoop:
@@ -38,7 +40,7 @@ class AgentLoop:
         self.tool_registry = tool_registry or {}
         self.max_turns = max_turns
     
-    def start(self, input_content: str, **metadata) -> AgentResponse:
+    def start(self, input_content: str, **metadata) -> GenericResponse:
         """
         Start a new agent session.
         
@@ -51,7 +53,7 @@ class AgentLoop:
         """
         return self.agent.start(input_content, **metadata)
     
-    def run_single_step(self, state: AgentState) -> AgentResponse:
+    def run_single_step(self, state: AgentState) -> GenericResponse:
         """
         Run a single step of the agent's lifecycle and process any resulting actions.
         
@@ -76,28 +78,28 @@ class AgentLoop:
                     # Record the tool result in history
                     response.state.add_message("tool", str(result))
                     # Update the input for the next step
-                    response.state.input = AgentInput(
+                    response.state.input = GenericRequest(
                         content=str(result),
                         metadata={"tool_name": tool_name}
                     )
                 except Exception as e:
                     error_message = f"Error executing tool {tool_name}: {str(e)}"
                     response.state.add_message("system", error_message)
-                    response.state.input = AgentInput(
+                    response.state.input = GenericRequest(
                         content=error_message,
                         metadata={"error": True}
                     )
             else:
                 error_message = f"Tool '{tool_name}' not found in the tool registry"
                 response.state.add_message("system", error_message)
-                response.state.input = AgentInput(
+                response.state.input = GenericRequest(
                     content=error_message,
                     metadata={"error": True}
                 )
         
         return response
     
-    def run_until_done(self, input_content: str, **metadata) -> AgentResponse:
+    def run_until_done(self, input_content: str, **metadata) -> GenericResponse:
         """
         Run the agent until it completes or reaches the maximum number of turns.
         
@@ -150,7 +152,7 @@ class AgentLoop:
             
             # Add the user input to the conversation history
             response.state.add_message("user", user_input)
-            response.state.input = AgentInput(content=user_input)
+            response.state.input = GenericRequest(content=user_input)
             
             # Run the agent step
             response = self.run_single_step(response.state)
