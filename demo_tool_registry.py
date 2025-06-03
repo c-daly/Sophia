@@ -40,6 +40,16 @@ def demo_basic_registry():
         print(f"Testing calculator: 10 / 3 = {calc_tool('10 / 3'):.2f}")
 
 
+    # Test web search tool
+    web_search_tool = registry.get_tool('web_search')
+    if web_search_tool:
+        print("\nTesting web search tool:")
+        search_query = "Python programming"
+        print(f"Searching for '{search_query}':")
+        results = web_search_tool(search_query)
+        for result in results:
+            print(f"  - {result['title']}: {result['url']}")
+
 def demo_decorator_registration():
     """Demonstrate decorator-based tool registration."""
     print("\n=== Decorator Registration Demo ===\n")
