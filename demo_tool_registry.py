@@ -48,7 +48,7 @@ def demo_basic_registry():
         print(f"Searching for '{search_query}':")
         results = web_search_tool(search_query)
         for result in results:
-            print(f"  - {result['title']}: {result['url']}")
+            print(f"  - {result}: {result}")
 
 def demo_decorator_registration():
     """Demonstrate decorator-based tool registration."""
