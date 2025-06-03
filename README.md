@@ -51,13 +51,14 @@ Sophia is an experimental, modular AI agent designed for **composable reasoning*
 Sophia is one piece of a broader modular agent family:
 ---
 
-### 📚 **LOGOS**
+### 📚 **LOGOS (Learning Optimal G\* of Systems)**
 
 > *Umbrella for project documentation, design, and domain knowledge.*
 > Not a service—just a well-organized store for specs, docs, and best practices.
 
 **Sophia’s connection:**
 LOGOS provides the documentation, specs, and reference material Sophia (and devs) use for consistency, knowledge grounding, and onboarding.
+Conceptually, LOGOS reflects the view that Sophia is ultimately a composable graph of thoughts, tools, and resources.
 
 ---
 
