@@ -4,8 +4,8 @@ thinking_styles.py
 Central place for every “how-to-think” strategy Sophia can use.
 Each strategy is a pure function: (model, state, cfg) -> str  (final answer).
 
-`state` is deliberately opaque: it just needs `.user_msg`  and a
-`.tool_runner(name, args) -> Any` callable if you let reactive use tools.
+'state' is deliberately opaque: it just needs '.user_msg'  and a
+'.tool_runner(name, args) -> Any' callable if you let reactive use tools.
 You can pass in your full ConversationState object.
 """
 
