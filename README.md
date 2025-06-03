@@ -72,7 +72,7 @@ Talos lets Sophia interact with environments, receive sensory data, and present 
 
 ---
 
-### 🎨 **Apollo (Communication & UI Layer)**
+### 🎨 **Apollo (Rendering & UI Layer)**
 
 > *Sophia’s expressive, adaptive UI layer—enhancing user interaction, switching between text, visuals, and more as needed.*
 > Apollo adapts communication mode to Sophia’s needs and user context.
