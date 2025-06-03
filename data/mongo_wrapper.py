@@ -2,10 +2,19 @@ from pymongo import MongoClient
 import os
 import pandas as pd
 import config
+import sys
+from pathlib import Path
+
+# Add the config directory to sys.path to import the config module
+config_dir = Path(__file__).parent.parent / 'config'
+sys.path.insert(0, str(config_dir))
+from config import get_config
 
 class MongoWrapper:
     def __init__(self):
-        self.db_url = os.environ["MONGO_URL"]
+        # Use centralized config for MongoDB URL
+        self._config = get_config()
+        self.db_url = self._config.get("mongo_url")
         self.client = MongoClient(self.db_url)
         self.db = self.client["sophia"]
         self.collection = self.db['interactions']

@@ -7,6 +7,7 @@ It serves as an example of how to build agents with the new lifecycle model.
 
 from agents.abstract_agent import AbstractAgent
 from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, AgentAction, ActionType
+from communications.generic_response import GenericResponse
 from models.openai_wrapper import OpenAIModel as OpenAIModel
 from prompts.prompts import DEFAULT_PROMPT
 
@@ -29,7 +30,7 @@ class StatefulConversationalAgent(AbstractAgent):
         self.system_prompt = system_prompt
         self.model = model if model else OpenAIModel()
     
-    def start(self, input_content: str, **metadata) -> AgentResponse:
+    def start(self, input_content: str, **metadata) -> GenericResponse:
         """
         Start a new conversation session.
         
@@ -53,7 +54,7 @@ class StatefulConversationalAgent(AbstractAgent):
         # Process this initial state
         return self.step(state)
     
-    def step(self, state: AgentState) -> AgentResponse:
+    def step(self, state: AgentState) -> GenericResponse:
         """
         Process a single step in the conversation.
         
@@ -74,7 +75,7 @@ class StatefulConversationalAgent(AbstractAgent):
             # Set the next action to respond with the generated text
             state.next_action = AgentAction.respond(response_text)
             
-            return AgentResponse(
+            return GenericResponse(
                 state=state,
                 output=response_text,
                 is_done=False  # Conversation can continue
@@ -84,22 +85,9 @@ class StatefulConversationalAgent(AbstractAgent):
             error_message = f"Error generating response: {str(e)}"
             state.add_message("system", error_message)
             
-            return AgentResponse(
+            return GenericResponse(
                 state=state,
                 output=error_message,
                 is_done=True  # End conversation due to error
             )
-    
-    def generate_query_sequence(self, text):
-        """
-        Legacy method implementation for backward compatibility.
-        
-        Args:
-            text: The user input text
-            
-        Returns:
-            The response text
-        """
-        # Use the new stateful methods but wrap as the old interface expects
-        response = self.start(text)
-        return response.output
+   

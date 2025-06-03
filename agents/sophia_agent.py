@@ -1,5 +1,6 @@
 from agents.abstract_agent import AbstractAgent
 from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, AgentAction, ActionType
+from communication.generic_response import GenericResponse
 from models.openai_wrapper import OpenAIModel
 from prompts.prompts import DEFAULT_PROMPT
 import agents.thinking_styles as thinking_styles
@@ -25,7 +26,7 @@ class SophiaAgent(AbstractAgent):
         self.model = OpenAIModel()
                 
 
-    def start(self, input_content: str, **metadata) -> AgentResponse:
+    def start(self, input_content: str, **metadata) -> GenericResponse:
         """
         Start a new session.
         
@@ -49,7 +50,7 @@ class SophiaAgent(AbstractAgent):
         # Process this initial state
         return self.step(state)
     
-    def step(self, state: AgentState) -> AgentResponse:
+    def step(self, state: AgentState) -> GenericResponse:
         """
         Process a single step in the conversation.
         
@@ -64,8 +65,6 @@ class SophiaAgent(AbstractAgent):
             thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REACTIVE, max_iterations=3, cot=thinking_styles.CoTVisibility.EXPOSE)
             response = thinking_styles.think(self.model, state, thinking_config)
 
-            if config.debug:
-                print(f"Agent response: {response.output}")
 
             response_text = response.output
             

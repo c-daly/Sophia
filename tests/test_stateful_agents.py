@@ -16,8 +16,9 @@ sys.modules['data.milvus_wrapper'] = MagicMock()
 sys.modules['prompts.prompts'] = MagicMock(DEFAULT_PROMPT="You are a helpful assistant")
 
 from agents.agent_interfaces import (
-    AgentState, AgentInput, AgentResponse, AgentAction, ActionType, Message, ToolCall
+    AgentState, AgentAction, ActionType, ToolCall
 )
+
 from agents.tool_agent import ToolAgent, calculator_tool
 from agents.agent_loop import AgentLoop
 from tools.registry import get_registry

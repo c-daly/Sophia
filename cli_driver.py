@@ -9,14 +9,16 @@ agents implemented using the stateful agent framework.
 import argparse
 import sys
 from typing import Dict, Any, Callable
-
+from pathlib import Path
+import config
+from config import Configurator, get_config, get_environment
 from agents.stateful_conversational_agent import StatefulConversationalAgent
 from agents.tool_agent import create_calculator_agent
 from agents.agent_loop import AgentLoop
 from agents.abstract_agent import AbstractAgent
 from agents.sophia_agent import SophiaAgent
-import config
 
+logger = None
 def get_available_agents() -> Dict[str, Callable[[], AbstractAgent]]:
     """
     Get a dictionary of available agent factories.
@@ -33,8 +35,10 @@ def get_available_agents() -> Dict[str, Callable[[], AbstractAgent]]:
 
 def main():
     """Run the CLI driver."""
-    # Set up command-line arguments
+    # Set up command-line arguments - include both CLI driver and config args
     parser = argparse.ArgumentParser(description="Stateful Agent Framework CLI Driver")
+    
+    # CLI driver specific arguments
     parser.add_argument(
         "--agent", "-a",
         choices=list(get_available_agents().keys()),
@@ -46,11 +50,6 @@ def main():
         action="store_true",
         help="Run in interactive mode"
     )    
-    parser.add_argument(
-        "--debug", "-d",
-        action="store_true",
-        help="Run in debug mode"
-    )
  
     parser.add_argument(
         "input",
@@ -59,7 +58,24 @@ def main():
         help="Initial input for the agent"
     )
     
+    # Configuration arguments (add config args to the main parser)
+    parser.add_argument("--env", type=str, help="Environment (dev/test/prod)")
+    parser.add_argument("--config", type=str, help="Path to config override JSON")
+    parser.add_argument("--memory", type=str, help="Override memory backend")
+    parser.add_argument("--debug", "-d", action="store_true", help="Enable debug mode")
+    parser.add_argument("--log-level", type=str, help="Override log level")
+    parser.add_argument("--mongo-url", type=str, help="Override MongoDB URL")
+    parser.add_argument("--neo4j-uri", type=str, help="Override Neo4j URI")
+    
     args = parser.parse_args()
+    
+    # Initialize config with parsed arguments
+    cfg = get_config(args)
+    configurator = Configurator()
+    logger = configurator.logger
+    # Log the current configuration if debug is enabled
+    if cfg.get("debug"):
+        configurator.logger.debug(f"Running in {get_environment()} environment")
     
     # Create the selected agent
     agent_factory = get_available_agents()[args.agent]
@@ -69,7 +85,7 @@ def main():
     loop = AgentLoop(agent)
     
     if args.debug:
-        config.debug = True
+        cfg['debug'] = True
         print("Debug mode enabled. Agent state will be printed after each interaction.")
     if args.interactive:
         # Interactive mode

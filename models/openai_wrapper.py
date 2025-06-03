@@ -10,8 +10,6 @@ from models.model_response import ModelResponse
 class OpenAIModel(AbstractModel):
 
     def generate_response(self, messages, model="gpt-3.5-turbo"):
-        if config.debug:
-            config.logger.debug(f"Debug mode is enabled. Messages: {messages}")
         response_obj = openai.responses.create(
             model=model,
             input=messages,

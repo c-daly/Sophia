@@ -8,6 +8,7 @@ including AgentInput, AgentState, and AgentResponse classes.
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Any, Optional, Union, Callable
+from communication.generic_request import GenericRequest
 
 
 class ActionType(Enum):
@@ -165,8 +166,8 @@ class AgentAction:
 @dataclass
 class AgentState:
     """The current state of an agent's processing."""
-    input: Optional[AgentInput] = None  # Current input being processed
-    user_msg: Optional[AgentInput] = None  # Current input being processed
+    input: Optional[GenericRequest] = None  # Current input being processed
+    user_msg: Optional[GenericRequest] = None  # Current input being processed
     history: List[Message] = field(default_factory=list)  # Conversation history
     next_action: AgentAction = field(default_factory=lambda: AgentAction.pending())
     working_memory: Dict[str, Any] = field(default_factory=dict)  # Agent's working memory
