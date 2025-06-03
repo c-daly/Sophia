@@ -11,7 +11,7 @@ The Dynamic Tool Registry enables:
 - **Hot-swapping**: Runtime replacement of tool implementations
 - **Rich Metadata**: Automatic parameter extraction and customizable tool descriptions
 - **Thread Safety**: Safe concurrent access to the registry
-- **Backward Compatibility**: Works alongside legacy tool implementations
+- **Clean Architecture**: Modern, streamlined tool management system
 
 ## Quick Start
 
@@ -179,9 +179,6 @@ agent_loop = AgentLoop(my_agent)
 # Access available tools
 available_tools = agent_loop.get_available_tools()
 tool_metadata = agent_loop.get_tool_metadata()
-
-# Register legacy tools for backward compatibility
-agent_loop.register_legacy_tool("old_tool", old_tool_function)
 ```
 
 ## Best Practices
@@ -274,49 +271,6 @@ for thread in threads:
     thread.start()
 for thread in threads:
     thread.join()
-```
-
-## Migration from Legacy Tools
-
-### Existing Tool Classes
-
-Convert existing `AbstractTool` classes to use the registry:
-
-```python
-# Old way
-class MyTool(AbstractTool):
-    def run(self, args=None):
-        return "result"
-    
-    def get_name(self):
-        return "my_tool"
-
-# New way
-@register_tool(name="my_tool")
-def my_tool_function(args=None):
-    """Tool description here."""
-    return "result"
-
-# For backward compatibility, keep the class
-class MyTool(AbstractTool):
-    def run(self, args=None):
-        return my_tool_function(args)
-    
-    def get_name(self):
-        return "my_tool"
-```
-
-### Legacy AgentLoop Usage
-
-The new `AgentLoop` maintains backward compatibility:
-
-```python
-# Old way - still works
-legacy_tools = {"tool1": tool1_func, "tool2": tool2_func}
-agent_loop = AgentLoop(agent, legacy_tool_registry=legacy_tools)
-
-# New way - automatic discovery
-agent_loop = AgentLoop(agent)  # Uses global registry automatically
 ```
 
 ## Error Handling

@@ -187,7 +187,7 @@ def main():
         print("✓ Rich metadata collection and querying")
         print("✓ Thread-safe operations")
         print("✓ Seamless integration with AgentLoop")
-        print("✓ Backward compatibility with legacy tools")
+        print("✓ Clean, modern tool architecture")
         
     except Exception as e:
         print(f"Error during demo: {e}")

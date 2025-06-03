@@ -129,16 +129,6 @@ available_tools = loop.get_available_tools()
 tool_metadata = loop.get_tool_metadata()
 ```
 
-### Legacy Tool Support
-
-For backward compatibility, you can still provide tools via dictionary:
-
-```python
-# Legacy approach (still supported)
-legacy_tools = {"old_tool": old_tool_function}
-loop = AgentLoop(agent, legacy_tool_registry=legacy_tools)
-```
-
 ## Creating Custom Agents
 
 ### Basic Agent Template

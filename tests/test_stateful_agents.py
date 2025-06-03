@@ -154,22 +154,6 @@ class TestAgentLoopWithToolRegistry(unittest.TestCase):
         self.assertIn("test_tool", metadata)
         self.assertEqual(metadata["test_tool"]["description"], "A test tool")
     
-    def test_agent_loop_legacy_compatibility(self):
-        """Test that AgentLoop maintains compatibility with legacy tool registry."""
-        # Add a legacy tool
-        def legacy_tool(x: int) -> int:
-            return x * 2
-        
-        self.agent_loop.register_legacy_tool("legacy_tool", legacy_tool)
-        
-        # Check availability
-        self.assertIn("legacy_tool", self.agent_loop.get_available_tools())
-        
-        # Check metadata includes legacy tools
-        metadata = self.agent_loop.get_tool_metadata()
-        self.assertIn("legacy_tool", metadata)
-        self.assertEqual(metadata["legacy_tool"]["tags"], ["legacy"])
-    
     def test_agent_loop_tool_execution(self):
         """Test that AgentLoop can execute tools properly."""
         # Register a simple tool
