@@ -65,6 +65,18 @@ class ToolRegistry:
     def clear(self):
         """Clear all registered tools."""
         self._tools.clear()
+
+    def get_all_tools_description(self) -> str:
+        """
+        Get a string description of all registered tools.
+        
+        Returns:
+            String containing descriptions of all tools
+        """
+        descriptions = []
+        for tool in self._tools_dict.values():
+            descriptions.append(f"{tool.name}: {tool.description}")
+        return "\n".join(descriptions)
    
 # Global registry instance
 registry = ToolRegistry()

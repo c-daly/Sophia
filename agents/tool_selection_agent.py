@@ -5,11 +5,11 @@ from communication.generic_request import GenericRequest
 from models.openai_wrapper import OpenAIModel
 from prompts.prompts import DEFAULT_PROMPT
 import agents.thinking_styles as thinking_styles
-import config
-from tool_selection_agent import ToolSelectionAgent
 from tools.registry import ToolRegistry
+import config
 
-class SophiaAgent(AbstractAgent):
+
+class ToolSelectionAgent(AbstractAgent):
     """
     A conversational agent implemented using the stateful agent framework.
     
@@ -17,16 +17,23 @@ class SophiaAgent(AbstractAgent):
     and state between interactions.
     """
     
-    def __init__(self, system_prompt=DEFAULT_PROMPT):
+    def __init__(self, tool_registry: ToolRegistry): 
         """
         Initialize the agent.
         
         Args:
             system_prompt: The system prompt to use for the agent
         """
-        self.tool_registry = ToolRegistry()
-        self.tool_selector = ToolSelectionAgent(self.tool_registry)
-        self.system_prompt = system_prompt
+        self.tool_registry = tool_registry
+        self.system_prompt = "You are an expert at decuding the proper tool for any job. " \
+                             "You will be given a user input and you must determine the best tool to use. " \
+                             "You will then respond with the tool name and any parameters needed to run it." \
+                             "Here are the tools from which you can choose:\n" + \
+                             self.tool_registry.get_all_tools_description() + "\n" + \
+                            "You must always respond with a tool name and parameters in the format: " \
+                                "tool_name: {tool_name}, parameters: {param1: value1, param2: value2}`. " \
+                                "If you cannot determine a tool, respond with `tool_name: None, parameters: {}`."
+
         self.model = OpenAIModel()
                 
 
