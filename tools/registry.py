@@ -8,7 +8,7 @@ This module provides a dynamic tool registry that supports:
 - Thread-safe operations
 """
 
-from abstract_tool import AbstractTool
+from tools.abstract_tool import AbstractTool
 import threading
 import importlib
 import inspect

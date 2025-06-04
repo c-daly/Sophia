@@ -9,9 +9,10 @@ class WebSearchTool(AbstractTool):
         self.name = "Web Search"
         self.description = "Search the web for information using Google search."
 
-    def run(self, query: GenericRequest) -> GenericResponse:
+    def run(self, request: GenericRequest) -> GenericResponse:
         """Run web search using the registered tool function."""
-        return search(query.content, advanced=True, num_results=5)
+        response = GenericResponse(output=search(request.content, num_results=5))
+        return response
 
     def get_name(self):
         """Get the tool name."""

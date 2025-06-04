@@ -64,43 +64,7 @@ class AgentLoop:
         Returns:
             The updated agent response
         """
-        # Have the agent process the current state
         response = self.agent.step(state)
-        
-        # Process any actions the agent determined to take
-        if response.state.next_action.type == ActionType.TOOL_CALL and "tool_call" in response.state.next_action.payload:
-            # Execute the tool call
-            tool_call = response.state.next_action.payload["tool_call"]
-            tool_name = tool_call.name
-            
-            # Get the tool from the registry
-            tool_function = self.tool_registry.get_tool(tool_name)
-            
-            if tool_function is not None:
-                try:
-                    result = tool_function(**tool_call.parameters)
-                    # Record the tool result in history
-                    response.state.add_message("tool", str(result))
-                    # Update the input for the next step
-                    response.state.input = GenericRequest(
-                        content=str(result),
-                        metadata={"tool_name": tool_name}
-                    )
-                except Exception as e:
-                    error_message = f"Error executing tool {tool_name}: {str(e)}"
-                    response.state.add_message("system", error_message)
-                    response.state.input = GenericRequest(
-                        content=error_message,
-                        metadata={"error": True}
-                    )
-            else:
-                error_message = f"Tool '{tool_name}' not found in the tool registry"
-                response.state.add_message("system", error_message)
-                response.state.input = GenericRequest(
-                    content=error_message,
-                    metadata={"error": True}
-                )
-        
         return response
     
     def run_until_done(self, input_content: str, **metadata) -> GenericResponse:

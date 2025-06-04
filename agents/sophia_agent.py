@@ -1,6 +1,7 @@
 from agents.abstract_agent import AbstractAgent
 from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, AgentAction, ActionType
 from communication.generic_response import GenericResponse
+from communication.generic_request import GenericRequest
 from models.openai_wrapper import OpenAIModel
 from prompts.prompts import DEFAULT_PROMPT
 import agents.thinking_styles as thinking_styles
@@ -45,8 +46,8 @@ class SophiaAgent(AbstractAgent):
         state.add_message("user", input_content)
         
         # Set the input for processing
-        state.user_msg = AgentInput(content=input_content, metadata=metadata)
-        state.input = AgentInput(content=input_content, metadata=metadata)
+        state.user_msg = GenericRequest(content=input_content, metadata=metadata)
+        state.input = GenericRequest(content=input_content, metadata=metadata)
         # Process this initial state
         return self.step(state)
     
@@ -77,7 +78,7 @@ class SophiaAgent(AbstractAgent):
                 metadata={"thinking_style": thinking_config.style.name}
             )
             
-            return AgentResponse(
+            return GenericResponse(
                 state=state,
                 output=response_text,
                 is_done=False  # Conversation can continue
@@ -87,7 +88,7 @@ class SophiaAgent(AbstractAgent):
             error_message = f"Error generating response: {str(e)}"
             state.add_message("system", error_message)
             
-            return AgentResponse(
+            return GenericResponse(
                 state=state,
                 output=error_message,
                 is_done=True  # End conversation due to error
