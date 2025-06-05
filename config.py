@@ -15,10 +15,11 @@ log_init = False
 class Configurator:
     """Configurator class to manage configurations."""
 
-    def __init__(self, env_name='dev'):
+    def __init__(self, log_level=logging.DEBUG, env_name='dev'):
         self.env_name = env_name
         self.config = self.load_config(env_name)
-        self.logger = self.init_logger(name='sophia', log_level=logging.DEBUG)
+        self.logger = self.init_logger(name='sophia', log_level=log_level)
+        self.log_level = log_level
 
     def load_config(self, env_name):
         """Load the configuration from a file."""
@@ -45,33 +46,4 @@ class Configurator:
         logger.addHandler(handler)
         logger.setLevel(log_level)
         return logger
-
-def get_config(args):
-    """Get the configuration dictionary."""
-    return {
-        "debug": args.debug,
-        "logger": logger,
-            }
-
-def load_config(env_name):
-    """ Load the config from env specific configuration file. """
-    # load config/dev.json
-    try:
-        with open(f'config/{env}.json', 'r') as f:
-            config = json.load(f)
-        return config
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Configuration file for environment '{env_name}' not found.")
-
-def get_mongo():
-    """Get the MongoDB wrapper instance."""
-    global mongo
-    if mongo is None:
-        from data.mongo_wrapper import MongoWrapper
-        mongo = MongoWrapper()
-    return mongo
-
-def get_environment():
-    """"Get the environment configuration."""
-    return env
 

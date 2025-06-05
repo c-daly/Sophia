@@ -6,7 +6,7 @@ from models.openai_wrapper import OpenAIModel
 from prompts.prompts import DEFAULT_PROMPT
 import agents.thinking_styles as thinking_styles
 import config
-from tool_selection_agent import ToolSelectionAgent
+from agents.tool_selection_agent import ToolSelectionAgent
 from tools.registry import ToolRegistry
 
 class SophiaAgent(AbstractAgent):
@@ -17,15 +17,16 @@ class SophiaAgent(AbstractAgent):
     and state between interactions.
     """
     
-    def __init__(self, system_prompt=DEFAULT_PROMPT):
+    def __init__(self, cfg, system_prompt=DEFAULT_PROMPT):
         """
         Initialize the agent.
         
         Args:
             system_prompt: The system prompt to use for the agent
         """
+        super().__init__(cfg)
         self.tool_registry = ToolRegistry()
-        self.tool_selector = ToolSelectionAgent(self.tool_registry)
+        self.tool_selector = ToolSelectionAgent(cfg, self.tool_registry)
         self.system_prompt = system_prompt
         self.model = OpenAIModel()
                 
@@ -64,10 +65,11 @@ class SophiaAgent(AbstractAgent):
         Returns:
             An AgentResponse with the updated state and agent's output
         """
+        self.logger.debug(f"Processing step with state: {state}")
         try:
             # This selection should ultimately be dynamic
             thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REACTIVE, max_iterations=3, cot=thinking_styles.CoTVisibility.EXPOSE)
-            response = thinking_styles.think(self.model, state, thinking_config)
+            response = thinking_styles.think(self.model, state, thinking_config, self.logger)
 
 
             response_text = response.output
@@ -80,7 +82,8 @@ class SophiaAgent(AbstractAgent):
                 content=response_text,
                 metadata={"thinking_style": thinking_config.style.name}
             )
-            
+            # Log the response 
+            self.logger.info(f"Generated response: {response_text}")
             return GenericResponse(
                 state=state,
                 output=response_text,

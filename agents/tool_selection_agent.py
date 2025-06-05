@@ -17,13 +17,14 @@ class ToolSelectionAgent(AbstractAgent):
     and state between interactions.
     """
     
-    def __init__(self, tool_registry: ToolRegistry): 
+    def __init__(self, config, tool_registry: ToolRegistry): 
         """
         Initialize the agent.
         
         Args:
             system_prompt: The system prompt to use for the agent
         """
+        super().__init__(config)
         self.tool_registry = tool_registry
         self.system_prompt = "You are an expert at decuding the proper tool for any job. " \
                              "You will be given a user input and you must determine the best tool to use. " \
@@ -73,8 +74,8 @@ class ToolSelectionAgent(AbstractAgent):
         """
         try:
             # This selection should ultimately be dynamic
-            thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REACTIVE, max_iterations=3, cot=thinking_styles.CoTVisibility.EXPOSE)
-            response = thinking_styles.think(self.model, state, thinking_config)
+            thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REFLEX, max_iterations=3, cot=thinking_styles.CoTVisibility.EXPOSE)
+            response = thinking_styles.think(self.model, state, thinking_config, self.logger)
 
 
             response_text = response.output
