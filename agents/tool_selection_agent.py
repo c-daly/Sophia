@@ -1,46 +1,41 @@
 from agents.abstract_agent import AbstractAgent
-from agents.agent_interfaces import AgentState
+from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, AgentAction, ActionType
 from communication.generic_response import GenericResponse
 from communication.generic_request import GenericRequest
 from models.openai_wrapper import OpenAIModel
-from prompts.prompts import DEFAULT_PROMPT
+from prompts.prompts import TOOL_SELECTION_PROMPT
 import agents.thinking_styles as thinking_styles
-from agents.tool_selection_agent import ToolSelectionAgent
 from tools.registry import ToolRegistry
-from tools.web_search_tool import WebSearchTool
-from tools.web_browsing_tool import WebBrowsingTool
-import json
+import config
 
-class SophiaAgent(AbstractAgent):
+
+class ToolSelectionAgent(AbstractAgent):
     """
     A conversational agent implemented using the stateful agent framework.
     
     This agent processes messages one step at a time, maintaining conversation history
     and state between interactions.
     """
-    def __init__(self, cfg, system_prompt=DEFAULT_PROMPT):
+    
+    def __init__(self, config, tool_registry: ToolRegistry): 
         """
         Initialize the agent.
         
         Args:
             system_prompt: The system prompt to use for the agent
         """
-        super().__init__(cfg)
-        self.prompt = system_prompt
-        self.model = OpenAIModel()
-        self._register_tools()
+        super().__init__(config)
+        self.tool_registry = tool_registry
+        tool_descriptions = self.tool_registry.get_all_tools_description()
+
+        self.logger.debug(f"Tool descriptions: {tool_descriptions}")
+        self.prompt = TOOL_SELECTION_PROMPT.format(tools=tool_descriptions)
+
+        self.logger.debug(f"Initializing ToolSelectionAgent with prompt: {self.prompt}")
+
+        self.model = OpenAIModel(temperature=0.0)
                 
-    def _register_tools(self):
-        """
-        Register the tools that this agent can use.
-        """
-        web_search_tool = WebSearchTool(self.cfg)
-        web_browsing_tool = WebBrowsingTool(self.cfg)
-        self.tool_registry = ToolRegistry(self.cfg)
-        self.tool_registry.register_tool(web_search_tool)
-        self.tool_registry.register_tool(web_browsing_tool)
-        self.tool_selector = ToolSelectionAgent(self.cfg, self.tool_registry)
-  
+
     def start(self, input_content: str, **metadata) -> GenericResponse:
         """
         Start a new session.
@@ -76,24 +71,22 @@ class SophiaAgent(AbstractAgent):
             An AgentResponse with the updated state and agent's output
         """
         try:
-            # Consider if tool selection is needed
-           
-            tool_response = self.tool_selector.start(state.input.content)
-            tool_json = json.loads(tool_response.output)
-            self.logger.debug(f"Tool result: {tool_json['tool']}")
-            tool = self.tool_registry.get_tool(tool_json['tool'])
-            tool_request = GenericRequest(content=tool_json['input'])
-            tool_result = tool.run(tool_request)
-            self.logger.debug(f"search result: {[result for result in tool_result.output]}")
+            self.logger.debug(f"Processing tool selection step with state: {state.history}")
             # This selection should ultimately be dynamic
-            thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REFLEX, max_iterations=3, cot=thinking_styles.CoTVisibility.EXPOSE)
-            response = thinking_styles.think(self.model, state, thinking_config, self.logger)
-
+            response = self.model.generate_response(state.get_messages_for_llm())
 
             response_text = response.output
-            
+
+            self.logger.debug(f"Generated tool selection response: {response_text}") 
+
             # Update the state with the new assistant response
             state.add_message("assistant", response_text)
+            
+            # Set the next action to respond with the generated text
+            #state.next_action = AgentAction.respond(
+            #    content=response_text,
+            #    metadata={"thinking_style": thinking_config.style.name}
+            #)
             
             return GenericResponse(
                 state=state,

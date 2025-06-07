@@ -2,11 +2,12 @@
 thinking_styles.py
 ──────────────────
 Central place for every “how-to-think” strategy Sophia can use.
-Each strategy is a pure function: (model, state, cfg) -> str  (final answer).
 
-`state` is deliberately opaque: it just needs `.user_msg`  and a
-`.tool_runner(name, args) -> Any` callable if you let reactive use tools.
-You can pass in your full ConversationState object.
+This module defines various thinking styles that Sophia can use to process user input and generate responses.
+It includes strategies like:
+- Reflex: A single-pass response generation.
+- Reactive: A ReAct loop that allows for tool invocation and observation.
+- Reflective: A multi-step process involving drafting, self-critique, and optional revision.
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ from pydantic import BaseModel
 from models.abstract_model import AbstractModel
 from communication.generic_response import GenericResponse
 import config
+from logging import Logger
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -39,7 +41,7 @@ class ThinkingConfig(BaseModel):
     style: ThinkStyle = ThinkStyle.REFLEX
     temperature: float = 0.1
     max_iterations: int = 3
-    cot: CoTVisibility = CoTVisibility.HIDDEN
+    cot: CoTVisibility = CoTVisibility.EXPOSE
     model_name: str = "gpt-4o-mini"        # picked by chooser
 
 
@@ -50,7 +52,8 @@ class ThinkingConfig(BaseModel):
 def think(
     llm_chat: AbstractModel,
     state: AgentState,
-    cfg: ThinkingConfig
+    cfg: ThinkingConfig,
+    logger: Logger
     ) -> GenericResponse:
     """
     llm_chat(messages, model_name, temperature) -> str
@@ -61,11 +64,11 @@ def think(
         .tool_runner(name:str, args:dict) -> Any   (only used by REACTIVE)
     """
     if cfg.style is ThinkStyle.REFLEX:
-        return _reflex(llm_chat, state, cfg)
+        return _reflex(llm_chat, state, cfg, logger)
     if cfg.style is ThinkStyle.REACTIVE:
-        return _reactive(llm_chat, state, cfg)
+        return _reactive(llm_chat, state, cfg, logger)
     if cfg.style is ThinkStyle.REFLECTIVE:
-        return _reflective(llm_chat, state, cfg)
+        return _reflective(llm_chat, state, cfg, logger)
     raise ValueError(f"Unknown style: {cfg.style}")
 
 
@@ -73,7 +76,7 @@ def think(
 #  Strategy implementations
 # ──────────────────────────────────────────────────────────────────────────────
 
-def _reflex(llm_chat, state, cfg) -> GenericResponse:
+def _reflex(llm_chat, state, cfg, logger) -> GenericResponse:
     """Single pass; no chain-of-thought unless cfg.cot != NONE."""
     system_prompt = "Answer the user concisely and accurately."
     if cfg.cot is CoTVisibility.HIDDEN:
@@ -81,18 +84,20 @@ def _reflex(llm_chat, state, cfg) -> GenericResponse:
             "Think step-by-step internally. "
             "After thinking, output ⧉ANSWER⧉ and your final answer."
         )
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user",   "content": state.user_msg.content},
-    ]
+    #messages = [
+    #    {"role": "system", "content": system_prompt},
+    #    {"role": "user",   "content": state.user_msg.content},
+    #]
+
+    messages = state.get_messages_for_llm()
     raw = llm_chat.generate_response(messages)
-    raw = raw.outputt.strip()
+    raw = raw.output.strip()
     if cfg.cot is CoTVisibility.HIDDEN:
-        return AgentResponse(state=state, output=raw.split("⧉ANSWER⧉")[-1].strip())
-    return AgentResponse(state=state, output=raw)
+        return GenericResponse(state=state, output=raw.split("⧉ANSWER⧉")[-1].strip())
+    return GenericResponse(state=state, output=raw)
 
 
-def _reactive(llm_chat, state, cfg) -> GenericResponse:
+def _reactive(llm_chat, state, cfg, logger) -> GenericResponse:
     """
     Simple ReAct loop:
         Thought -> (optional) tool call -> Observation … finish.
@@ -107,16 +112,12 @@ def _reactive(llm_chat, state, cfg) -> GenericResponse:
         {"role": "user", "content": state.input.content},
     ]
 
-    #if config.debug:
-    #    print(f"User message: {state.input.content}")
-
     for _ in range(cfg.max_iterations):
         assistant = llm_chat.generate_response(messages)
         assistant = assistant.output.strip()
         messages.append({"role": "assistant", "content": assistant})
 
-        #if config.debug:
-        #    print(f"LLM response: {assistant}")
+        logger.debug(f"LLM response: {assistant}")
 
         # finished?
         if assistant.startswith("FINAL:"):
@@ -131,6 +132,9 @@ def _reactive(llm_chat, state, cfg) -> GenericResponse:
                 action_json = assistant.split("ACTION:")[1].strip()
                 action = json.loads(action_json)
                 result = state.tool_runner(action["name"], action["arguments"])
+
+                logger.debug(f"Tool result: {result}")
+
                 messages.append({"role": "system", "content":
                     f"OBSERVATION: {result}"})
             except Exception as exc:
@@ -144,7 +148,7 @@ def _reactive(llm_chat, state, cfg) -> GenericResponse:
     )
 
 
-def _reflective(llm_chat, state, cfg) -> GenericResponse:
+def _reflective(llm_chat, state, cfg, logger) -> GenericResponse:
     """Draft ➔ self-critique ➔ optional revision.  ≤3 LLM calls."""
     # 1) Draft with hidden CoT
     draft = llm_chat.generate_response(
@@ -158,8 +162,6 @@ def _reflective(llm_chat, state, cfg) -> GenericResponse:
     draft = draft.output
     answer = draft.split("⧉ANSWER⧉")[-1].strip()
 
-    #if config.debug:
-    #    print(f"Draft answer: {answer}")
 
     # 2) Critique
     critique = llm_chat.generate_response(
@@ -172,9 +174,6 @@ def _reflective(llm_chat, state, cfg) -> GenericResponse:
     )
 
     critique = critique.output_text.strip()
-    #if config.debug:
-    #    print(f"Critique: {critique}")
-
 
     # 3) Optional revision
     if critique != "NONE":

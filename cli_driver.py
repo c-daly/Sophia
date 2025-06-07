@@ -10,8 +10,7 @@ import argparse
 import sys
 from typing import Dict, Any, Callable
 from pathlib import Path
-import config
-from config import Configurator, get_config, get_environment
+from config import Configurator
 from agents.stateful_conversational_agent import StatefulConversationalAgent
 from agents.tool_agent import create_calculator_agent
 from agents.agent_loop import AgentLoop
@@ -19,7 +18,7 @@ from agents.abstract_agent import AbstractAgent
 from agents.sophia_agent import SophiaAgent
 
 logger = None
-def get_available_agents() -> Dict[str, Callable[[], AbstractAgent]]:
+def get_available_agents(cfg: Configurator) -> Dict[str, Callable[[], AbstractAgent]]:
     """
     Get a dictionary of available agent factories.
     
@@ -27,9 +26,9 @@ def get_available_agents() -> Dict[str, Callable[[], AbstractAgent]]:
         A mapping of agent names to factory functions
     """
     return {
-        "conversational": lambda: StatefulConversationalAgent(),
+        "conversational": lambda: StatefulConversationalAgent(cfg),
         "calculator": create_calculator_agent,
-        "sophia": lambda: SophiaAgent()
+        "sophia": lambda: SophiaAgent(cfg)
     }
 
 
@@ -38,10 +37,10 @@ def main():
     # Set up command-line arguments - include both CLI driver and config args
     parser = argparse.ArgumentParser(description="Stateful Agent Framework CLI Driver")
     
+    cfg = Configurator()
+
     # CLI driver specific arguments
-    parser.add_argument(
-        "--agent", "-a",
-        choices=list(get_available_agents().keys()),
+    parser.add_argument("--agent", "-a",choices=list(get_available_agents(cfg).keys()),
         default="conversational",
         help="The type of agent to use"
     )
@@ -69,24 +68,16 @@ def main():
     
     args = parser.parse_args()
     
-    # Initialize config with parsed arguments
-    cfg = get_config(args)
-    configurator = Configurator()
-    logger = configurator.logger
     # Log the current configuration if debug is enabled
-    if cfg.get("debug"):
-        configurator.logger.debug(f"Running in {get_environment()} environment")
+    cfg.logger.debug(f"Running in {cfg.env_name} environment")
     
     # Create the selected agent
-    agent_factory = get_available_agents()[args.agent]
+    agent_factory = get_available_agents(cfg)[args.agent]
     agent = agent_factory()
     
     # Create an agent loop
     loop = AgentLoop(agent)
     
-    if args.debug:
-        cfg['debug'] = True
-        print("Debug mode enabled. Agent state will be printed after each interaction.")
     if args.interactive:
         # Interactive mode
         if args.input:

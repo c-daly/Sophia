@@ -8,8 +8,10 @@ from models.model_response import ModelResponse
      ChatCompletion and Embedding are offered.
 """
 class OpenAIModel(AbstractModel):
+    def __init__(self, temperature=0.7):
+        super().__init__(temperature=temperature)
 
-    def generate_response(self, messages, model="gpt-3.5-turbo"):
+    def generate_response(self, messages, model="o4-mini"):
         response_obj = openai.responses.create(
             model=model,
             input=messages,

@@ -1,13 +1,25 @@
 from abc import ABC, abstractmethod
 from communication.generic_response import GenericResponse
 from typing import Optional, Dict, Any, List, Union
-
+from config import Configurator
 from agents.agent_interfaces import AgentState, AgentInput, AgentResponse
+from prompts.prompts import DEFAULT_PROMPT
 
 
 # Abstract base class for an agent
 class AbstractAgent(ABC):
    
+    def __init__(self, cfg: Configurator, prompt=DEFAULT_PROMPT):
+        """
+        Initialize the agent with a configuration.
+        
+        Args:
+            cfg: Configuration object for the agent
+        """
+        self.cfg = cfg
+        self.logger = cfg.logger
+        self.prompt = prompt
+
     @abstractmethod
     def start(self, input_content: str, **metadata) -> GenericResponse:
         """
