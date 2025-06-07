@@ -3,7 +3,7 @@ from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, Agent
 from communication.generic_response import GenericResponse
 from communication.generic_request import GenericRequest
 from models.openai_wrapper import OpenAIModel
-from prompts.prompts import DEFAULT_PROMPT
+from prompts.prompts import TOOL_SELECTION_PROMPT
 import agents.thinking_styles as thinking_styles
 from tools.registry import ToolRegistry
 import config
@@ -26,16 +26,14 @@ class ToolSelectionAgent(AbstractAgent):
         """
         super().__init__(config)
         self.tool_registry = tool_registry
-        self.system_prompt = "You are an expert at decuding the proper tool for any job. " \
-                             "You will be given a user input and you must determine the best tool to use. " \
-                             "You will then respond with the tool name and any parameters needed to run it." \
-                             "Here are the tools from which you can choose:\n" + \
-                             self.tool_registry.get_all_tools_description() + "\n" + \
-                            "You must always respond with a tool name and parameters in the format: " \
-                                "tool_name: {tool_name}, parameters: {param1: value1, param2: value2}`. " \
-                                "If you cannot determine a tool, respond with `tool_name: None, parameters: {}`."
+        tool_descriptions = self.tool_registry.get_all_tools_description()
 
-        self.model = OpenAIModel()
+        self.logger.debug(f"Tool descriptions: {tool_descriptions}")
+        self.prompt = TOOL_SELECTION_PROMPT.format(tools=tool_descriptions)
+
+        self.logger.debug(f"Initializing ToolSelectionAgent with prompt: {self.prompt}")
+
+        self.model = OpenAIModel(temperature=0.0)
                 
 
     def start(self, input_content: str, **metadata) -> GenericResponse:
@@ -53,7 +51,7 @@ class ToolSelectionAgent(AbstractAgent):
         state = AgentState()
         
         # Add the system prompt and initial user message
-        state.add_message("system", self.system_prompt)
+        state.add_message("system", self.prompt)
         state.add_message("user", input_content)
         
         # Set the input for processing
@@ -73,21 +71,22 @@ class ToolSelectionAgent(AbstractAgent):
             An AgentResponse with the updated state and agent's output
         """
         try:
+            self.logger.debug(f"Processing tool selection step with state: {state.history}")
             # This selection should ultimately be dynamic
-            thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REFLEX, max_iterations=3, cot=thinking_styles.CoTVisibility.EXPOSE)
-            response = thinking_styles.think(self.model, state, thinking_config, self.logger)
-
+            response = self.model.generate_response(state.get_messages_for_llm())
 
             response_text = response.output
-            
+
+            self.logger.debug(f"Generated tool selection response: {response_text}") 
+
             # Update the state with the new assistant response
             state.add_message("assistant", response_text)
             
             # Set the next action to respond with the generated text
-            state.next_action = AgentAction.respond(
-                content=response_text,
-                metadata={"thinking_style": thinking_config.style.name}
-            )
+            #state.next_action = AgentAction.respond(
+            #    content=response_text,
+            #    metadata={"thinking_style": thinking_config.style.name}
+            #)
             
             return GenericResponse(
                 state=state,

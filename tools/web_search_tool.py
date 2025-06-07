@@ -1,17 +1,19 @@
-from communication import GenericRequest, GenericResponse
+from communication.generic_request import GenericRequest
+from communication.generic_response import GenericResponse
 from tools.abstract_tool import AbstractTool
-from tools.registry import register_tool
-from typing import List, Dict, Any
 from googlesearch import search
 
 class WebSearchTool(AbstractTool):
-    def __init__(self):
+    def __init__(self, cfg):
+        self.cfg = cfg
         self.name = "Web Search"
         self.description = "Search the web for information using Google search."
 
     def run(self, request: GenericRequest) -> GenericResponse:
         """Run web search using the registered tool function."""
-        response = GenericResponse(output=search(request.content, num_results=5))
+        self.cfg.logger.debug(f"Running {self.name} tool with request: {request.content}")
+        search_response = search(request.content)
+        response = GenericResponse(output=search_response)
         return response
 
     def get_name(self):

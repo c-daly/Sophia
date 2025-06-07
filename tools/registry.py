@@ -9,16 +9,11 @@ This module provides a dynamic tool registry that supports:
 """
 
 from tools.abstract_tool import AbstractTool
-import threading
-import importlib
-import inspect
-from typing import Dict, List, Any, Callable, Optional, Union
-from dataclasses import dataclass, field
-from functools import wraps
-
+from typing import Dict, List, Union
 
 class ToolRegistry:
-    def __init__(self):
+    def __init__(self, cfg):
+        self.cfg = cfg
         self._tools = []
         self._tools_dict: Dict[str, AbstractTool] = {}
     
@@ -77,84 +72,19 @@ class ToolRegistry:
         for tool in self._tools_dict.values():
             descriptions.append(f"{tool.name}: {tool.description}")
         return "\n".join(descriptions)
-   
-# Global registry instance
-registry = ToolRegistry()
 
-
-def register_tool(name: Optional[str] = None,
-                  description: str = "",
-                  parameters: Optional[Dict[str, Any]] = None,
-                  tags: Optional[List[str]] = None,
-                  version: str = "1.0.0"):
-    """
-    Decorator to automatically register a function as a tool.
-    
-    Args:
-        name: Tool name (uses function name if not provided)
-        description: Tool description
-        parameters: Parameter schema for the tool
-        tags: Tags for categorizing the tool
-        version: Tool version
+    def get_tool(self, name: str) -> Union[AbstractTool, None]:
+        """
+        Get a tool by its name.
         
-    Returns:
-        Decorated function
-    """
-    def decorator(func: Callable) -> Callable:
-        tool_name = name or func.__name__
-        
-        # Extract description from docstring if not provided
-        tool_description = description
-        if not tool_description and func.__doc__:
-            tool_description = func.__doc__.strip().split('\n')[0]
-        
-        # Extract parameter information from function signature
-        tool_parameters = parameters or {}
-        if not tool_parameters:
-            sig = inspect.signature(func)
-            tool_parameters = {
-                param_name: {
-                    "type": param.annotation.__name__ if param.annotation != inspect.Parameter.empty else "Any",
-                    "default": param.default if param.default != inspect.Parameter.empty else None,
-                    "required": param.default == inspect.Parameter.empty
-                }
-                for param_name, param in sig.parameters.items()
-            }
-        
-        # Register the tool
-        registry.register(
-            name=tool_name,
-            function=func,
-            description=tool_description,
-            parameters=tool_parameters,
-            tags=tags or [],
-            version=version
-        )
-        
-        return func
-    
-    return decorator
-
-
-def get_registry() -> ToolRegistry:
-    """
-    Get the global tool registry instance.
-    
-    Returns:
-        The global ToolRegistry instance
-    """
-    return registry
-
-
-def autodiscover_tools(module_names: List[str]):
-    """
-    Automatically discover and register tools from specified modules.
-    
-    Args:
-        module_names: List of module names to scan for tools
-    """
-    for module_name in module_names:
-        try:
-            importlib.import_module(module_name)
-        except ImportError as e:
-            print(f"Warning: Could not import module {module_name}: {e}")
+        Args:
+            name: Name of the tool to retrieve
+            
+        Returns:
+            The tool instance if found, None otherwise
+        """
+        tool = self._tools_dict.get(name)
+        if tool is None:
+            raise ValueError(f"Tool '{name}' not found in registry.")
+        self.cfg.logger.debug(f"Retrieved tool: {tool.name}")
+        return self._tools_dict.get(name, None)

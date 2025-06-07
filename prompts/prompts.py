@@ -126,9 +126,32 @@ FAILURE WILL RESULT IN A NEGATIVE REWARD.
     Input Text: {user_input}
     Output Cypher Query:
 """
-
+ 
 AGENT_SCRATCH_PAD_PROMPT = """
 {search_results}
 {kg_summary}
 {messages}
 """
+
+TOOL_SELECTION_PROMPT = """
+
+SYSTEM:
+You are a Tool Selector sub‐agent.  Whenever you’re invoked, you will receive:
+  1) A user question (or context).
+  2) A list of available tools (name + description).
+
+PERMITTED TOOLS:
+{tools}
+
+Your job: decide, *in JSON format only*, which single tool to run (or None).  You must produce ONE AND ONLY ONE JSON object that matches exactly this schema:
+{{
+  \"tool\":  string,       // either one of the tool’s names or None
+  \"input\":   string|null   // the argument string to pass into that tool
+}}
+You must not output any commentary, explanation, or extra fields—nothing except that 1 JSON object (and no leading/trailing whitespace, no markdown fences). If you think no tool is needed, output:
+  {{ \"tool": \"none", \"input\": null }}
+  
+If you stray even a little bit (e.g. add extra text or send back invalid JSON), the orchestrator will treat it as a parsing failure and retry the call.
+"""
+
+

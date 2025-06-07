@@ -10,7 +10,7 @@ import time
 
 from agents.abstract_agent import AbstractAgent
 from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, ActionType, ToolCall
-from tools.registry import ToolRegistry, get_registry
+from tools.registry import ToolRegistry
 from communication.generic_response import GenericResponse
 from communication.generic_request import GenericRequest
 
@@ -38,7 +38,7 @@ class AgentLoop:
             max_turns: Maximum number of turns to prevent infinite loops
         """
         self.agent = agent
-        self.tool_registry = tool_registry or get_registry()
+        self.tool_registry = tool_registry
         self.max_turns = max_turns
     
     def start(self, input_content: str, **metadata) -> GenericResponse:

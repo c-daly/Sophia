@@ -6,6 +6,7 @@
 
 from agents.abstract_agent import AbstractAgent
 from models.static_openai_wrapper import StaticOpenAIModel
+from prompts.prompt import DefaultPrompt
 
 class ConversationalAgent(AbstractAgent):
     def __init__(self):
