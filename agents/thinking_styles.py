@@ -156,7 +156,7 @@ def _reflective(llm_chat, state, cfg, logger) -> GenericResponse:
             {"role": "user", "content": state.user_msg.content},
         ],
     )
-
+    
     draft = draft.output
     answer = draft.split("⧉ANSWER⧉")[-1].strip()
 
@@ -170,8 +170,6 @@ def _reflective(llm_chat, state, cfg, logger) -> GenericResponse:
             {"role": "user", "content": "List issues or reply NONE."},
         ],
     )
-
-    critique = critique.output_text.strip()
 
     # 3) Optional revision
     if critique != "NONE":

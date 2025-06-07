@@ -26,10 +26,7 @@ class ToolSelectionAgent(AbstractAgent):
         self.tool_registry = tool_registry
         tool_descriptions = self.tool_registry.get_all_tools_description()
 
-        self.logger.debug(f"Tool descriptions: {tool_descriptions}")
         self.prompt = TOOL_SELECTION_PROMPT.format(tools=tool_descriptions)
-
-        self.logger.debug(f"Initializing ToolSelectionAgent with prompt: {self.prompt}")
 
         self.model = OpenAIModel(temperature=0.0)
                 
@@ -69,13 +66,11 @@ class ToolSelectionAgent(AbstractAgent):
             An AgentResponse with the updated state and agent's output
         """
         try:
-            self.logger.debug(f"Processing tool selection step with state: {state.history}")
             # This selection should ultimately be dynamic
             response = self.model.generate_response(state.get_messages_for_llm())
 
             response_text = response.output
 
-            self.logger.debug(f"Generated tool selection response: {response_text}") 
 
             # Update the state with the new assistant response
             state.add_message("assistant", response_text)

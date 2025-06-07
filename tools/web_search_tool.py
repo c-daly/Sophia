@@ -12,8 +12,13 @@ class WebSearchTool(AbstractTool):
     def run(self, request: GenericRequest) -> GenericResponse:
         """Run web search using the registered tool function."""
         self.cfg.logger.debug(f"Running {self.name} tool with request: {request.content}")
-        search_response = search(request.content)
+        search_response = search(request.content, advanced=True, num_results=5)
+
+        # convert results to string format
+        search_response = "\n".join([f"{i+1}. {result}" for i, result in enumerate(search_response)])
         response = GenericResponse(output=search_response)
+
+
         return response
 
     def get_name(self):

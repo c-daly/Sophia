@@ -35,10 +35,10 @@ class SophiaAgent(AbstractAgent):
         Register the tools that this agent can use.
         """
         web_search_tool = WebSearchTool(self.cfg)
-        web_browsing_tool = WebBrowsingTool(self.cfg)
+        #web_browsing_tool = WebBrowsingTool(self.cfg)
         self.tool_registry = ToolRegistry(self.cfg)
         self.tool_registry.register_tool(web_search_tool)
-        self.tool_registry.register_tool(web_browsing_tool)
+        #self.tool_registry.register_tool(web_browsing_tool)
         self.tool_selector = ToolSelectionAgent(self.cfg, self.tool_registry)
   
     def start(self, input_content: str, **metadata) -> GenericResponse:
@@ -62,9 +62,11 @@ class SophiaAgent(AbstractAgent):
         # Set the input for processing
         state.user_msg = GenericRequest(content=input_content, metadata=metadata)
         state.input = GenericRequest(content=input_content, metadata=metadata)
+
         # Process this initial state
         return self.step(state)
     
+
     def step(self, state: AgentState) -> GenericResponse:
         """
         Process a single step in the conversation.
@@ -77,18 +79,21 @@ class SophiaAgent(AbstractAgent):
         """
         try:
             # Consider if tool selection is needed
-           
             tool_response = self.tool_selector.start(state.input.content)
             tool_json = json.loads(tool_response.output)
-            self.logger.debug(f"Tool result: {tool_json['tool']}")
-            tool = self.tool_registry.get_tool(tool_json['tool'])
-            tool_request = GenericRequest(content=tool_json['input'])
-            tool_result = tool.run(tool_request)
+            tool_name = tool_json['tool']
+
+            if tool_name != "none":
+                tool = self.tool_registry.get_tool(tool_json['tool'])
+                tool_request = GenericRequest(content=tool_json['input'])
+                tool_result = tool.run(tool_request)
+                self.logger.debug(f"Tool result: {tool_result.output}")
+                self.prompt += f"\n\nTool result: {tool_result.output}"
+
             # This selection should ultimately be dynamic
             thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REFLEX, max_iterations=3, cot=thinking_styles.CoTVisibility.EXPOSE)
+
             response = thinking_styles.think(self.model, state, thinking_config, self.logger)
-
-
             response_text = response.output
             
             # Update the state with the new assistant response
