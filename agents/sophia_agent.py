@@ -1,14 +1,14 @@
 from agents.abstract_agent import AbstractAgent
-from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, AgentAction, ActionType
+from agents.agent_interfaces import AgentState
 from communication.generic_response import GenericResponse
 from communication.generic_request import GenericRequest
 from models.openai_wrapper import OpenAIModel
 from prompts.prompts import DEFAULT_PROMPT
 import agents.thinking_styles as thinking_styles
-import config
 from agents.tool_selection_agent import ToolSelectionAgent
 from tools.registry import ToolRegistry
 from tools.web_search_tool import WebSearchTool
+from tools.web_browsing_tool import WebBrowsingTool
 import json
 
 class SophiaAgent(AbstractAgent):
@@ -18,7 +18,6 @@ class SophiaAgent(AbstractAgent):
     This agent processes messages one step at a time, maintaining conversation history
     and state between interactions.
     """
-    
     def __init__(self, cfg, system_prompt=DEFAULT_PROMPT):
         """
         Initialize the agent.
@@ -27,14 +26,21 @@ class SophiaAgent(AbstractAgent):
             system_prompt: The system prompt to use for the agent
         """
         super().__init__(cfg)
-        web_search_tool = WebSearchTool(cfg)
-        self.tool_registry = ToolRegistry(cfg)
-        self.tool_registry.register_tool(web_search_tool)
-        self.tool_selector = ToolSelectionAgent(cfg, self.tool_registry)
         self.prompt = system_prompt
         self.model = OpenAIModel()
+        self._register_tools()
                 
-
+    def _register_tools(self):
+        """
+        Register the tools that this agent can use.
+        """
+        web_search_tool = WebSearchTool(self.cfg)
+        web_browsing_tool = WebBrowsingTool(self.cfg)
+        self.tool_registry = ToolRegistry(self.cfg)
+        self.tool_registry.register_tool(web_search_tool)
+        self.tool_registry.register_tool(web_browsing_tool)
+        self.tool_selector = ToolSelectionAgent(self.cfg, self.tool_registry)
+  
     def start(self, input_content: str, **metadata) -> GenericResponse:
         """
         Start a new session.
@@ -69,7 +75,6 @@ class SophiaAgent(AbstractAgent):
         Returns:
             An AgentResponse with the updated state and agent's output
         """
-        #self.logger.debug(f"Processing step with state: {state}")
         try:
             # Consider if tool selection is needed
            
@@ -90,13 +95,6 @@ class SophiaAgent(AbstractAgent):
             # Update the state with the new assistant response
             state.add_message("assistant", response_text)
             
-            # Set the next action to respond with the generated text
-            #state.next_action = AgentAction.respond(
-            #    content=response_text,
-            #    metadata={"thinking_style": thinking_config.style.name}
-            #)
-            # Log the response 
-            #self.logger.info(f"Generated response: {response_text}")
             return GenericResponse(
                 state=state,
                 output=response_text,
