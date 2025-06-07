@@ -6,7 +6,7 @@ It serves as an example of how to build agents with the new lifecycle model.
 """
 
 from agents.abstract_agent import AbstractAgent
-from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, AgentAction, ActionType
+from agents.agent_interfaces import AgentState
 from communication.generic_response import GenericResponse
 from models.openai_wrapper import OpenAIModel as OpenAIModel
 from prompts.prompts import DEFAULT_PROMPT
@@ -73,7 +73,7 @@ class StatefulConversationalAgent(AbstractAgent):
             state.add_message("assistant", response_text)
             
             # Set the next action to respond with the generated text
-            state.next_action = AgentAction.respond(response_text)
+            #state.next_action = AgentAction.respond(response_text)
             
             return GenericResponse(
                 state=state,

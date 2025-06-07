@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from communication.generic_response import GenericResponse
-from typing import Optional, Dict, Any, List, Union
 from config import Configurator
-from agents.agent_interfaces import AgentState, AgentInput, AgentResponse
+from agents.agent_interfaces import AgentState
 from prompts.prompts import DEFAULT_PROMPT
 
 

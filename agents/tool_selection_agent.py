@@ -1,12 +1,10 @@
 from agents.abstract_agent import AbstractAgent
-from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, AgentAction, ActionType
+from agents.agent_interfaces import AgentState
 from communication.generic_response import GenericResponse
 from communication.generic_request import GenericRequest
 from models.openai_wrapper import OpenAIModel
 from prompts.prompts import TOOL_SELECTION_PROMPT
-import agents.thinking_styles as thinking_styles
 from tools.registry import ToolRegistry
-import config
 
 
 class ToolSelectionAgent(AbstractAgent):

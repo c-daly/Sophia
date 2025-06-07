@@ -9,7 +9,7 @@ from typing import Dict, Any, Optional, List
 import time
 
 from agents.abstract_agent import AbstractAgent
-from agents.agent_interfaces import AgentState, AgentInput, AgentResponse, ActionType, ToolCall
+from agents.agent_interfaces import AgentState
 from tools.registry import ToolRegistry
 from communication.generic_response import GenericResponse
 from communication.generic_request import GenericRequest

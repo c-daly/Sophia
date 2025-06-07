@@ -9,10 +9,8 @@ agents implemented using the stateful agent framework.
 import argparse
 import sys
 from typing import Dict, Any, Callable
-from pathlib import Path
 from config import Configurator
 from agents.stateful_conversational_agent import StatefulConversationalAgent
-from agents.tool_agent import create_calculator_agent
 from agents.agent_loop import AgentLoop
 from agents.abstract_agent import AbstractAgent
 from agents.sophia_agent import SophiaAgent
@@ -27,7 +25,6 @@ def get_available_agents(cfg: Configurator) -> Dict[str, Callable[[], AbstractAg
     """
     return {
         "conversational": lambda: StatefulConversationalAgent(cfg),
-        "calculator": create_calculator_agent,
         "sophia": lambda: SophiaAgent(cfg)
     }
 
