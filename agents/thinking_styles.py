@@ -82,12 +82,13 @@ def _reflex(llm_chat, state, cfg, logger) -> GenericResponse:
             "Think step-by-step internally. "
             "After thinking, output ⧉ANSWER⧉ and your final answer."
         )
-    #messages = [
-    #    {"role": "system", "content": system_prompt},
-    #    {"role": "user",   "content": state.user_msg.content},
-    #]
+    messages = [
+        {"role": "system", "content": system_prompt},
+    ]
 
-    messages = state.get_messages_for_llm()
+    for message in state.get_messages_for_llm():
+        messages.append(message)
+
     raw = llm_chat.generate_response(messages)
     raw = raw.output.strip()
     if cfg.cot is CoTVisibility.HIDDEN:
