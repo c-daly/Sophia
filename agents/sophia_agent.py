@@ -3,7 +3,7 @@ from agents.agent_interfaces import AgentState
 from communication.generic_response import GenericResponse
 from communication.generic_request import GenericRequest
 from models.openai_wrapper import OpenAIModel
-from prompts.prompts import DEFAULT_PROMPT
+from prompts.prompts import DEFAULT_PROMPT, SOPHIA_PROMPT
 import agents.thinking_styles as thinking_styles
 from agents.tool_selection_agent import ToolSelectionAgent
 from tools.registry import ToolRegistry
@@ -18,7 +18,7 @@ class SophiaAgent(AbstractAgent):
     This agent processes messages one step at a time, maintaining conversation history
     and state between interactions.
     """
-    def __init__(self, cfg, system_prompt=DEFAULT_PROMPT):
+    def __init__(self, cfg, system_prompt=SOPHIA_PROMPT):
         """
         Initialize the agent.
         
@@ -29,16 +29,17 @@ class SophiaAgent(AbstractAgent):
         self.prompt = system_prompt
         self.model = OpenAIModel()
         self._register_tools()
+        self.cfg.logger.debug(f"SophiaAgent initialized with prompt: {self.prompt}")
                 
     def _register_tools(self):
         """
         Register the tools that this agent can use.
         """
         web_search_tool = WebSearchTool(self.cfg)
-        #web_browsing_tool = WebBrowsingTool(self.cfg)
+        web_browsing_tool = WebBrowsingTool(self.cfg)
         self.tool_registry = ToolRegistry(self.cfg)
         self.tool_registry.register_tool(web_search_tool)
-        #self.tool_registry.register_tool(web_browsing_tool)
+        self.tool_registry.register_tool(web_browsing_tool)
         self.tool_selector = ToolSelectionAgent(self.cfg, self.tool_registry)
   
     def start(self, input_content: str, **metadata) -> GenericResponse:
@@ -60,7 +61,6 @@ class SophiaAgent(AbstractAgent):
         state.add_message("user", input_content)
         
         # Set the input for processing
-        state.user_msg = GenericRequest(content=input_content, metadata=metadata)
         state.input = GenericRequest(content=input_content, metadata=metadata)
 
         # Process this initial state
@@ -85,6 +85,7 @@ class SophiaAgent(AbstractAgent):
 
             if tool_name != "none":
                 tool = self.tool_registry.get_tool(tool_json['tool'])
+
                 tool_request = GenericRequest(content=tool_json['input'])
                 tool_result = tool.run(tool_request)
                 self.logger.debug(f"Tool result: {tool_result.output}")

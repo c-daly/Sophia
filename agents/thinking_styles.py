@@ -40,7 +40,7 @@ class ThinkingConfig(BaseModel):
     temperature: float = 0.1
     max_iterations: int = 3
     cot: CoTVisibility = CoTVisibility.EXPOSE
-    model_name: str = "gpt-4o-mini"        # picked by chooser
+    model_name: str = "gpt-3.5-turbo"  # Default model, can be overridden
 
 
 # ──────────────────────────────────────────────────────────────────────────────

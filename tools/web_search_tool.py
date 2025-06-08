@@ -6,7 +6,7 @@ from googlesearch import search
 class WebSearchTool(AbstractTool):
     def __init__(self, cfg):
         self.cfg = cfg
-        self.name = "Web Search"
+        self.name = "WebSearch"
         self.description = "Search the web for information using Google search."
 
     def run(self, request: GenericRequest) -> GenericResponse:

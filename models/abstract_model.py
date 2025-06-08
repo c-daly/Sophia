@@ -9,12 +9,13 @@ class AbstractModel(ABC):
     """
     Abstract base class for LLM model interfaces.
     """
-    def __init__(self, temperature: float = 0.7):
+    def __init__(self, temperature: float = 0.7, model="gpt-3.5-turbo") -> None:
         """
         Initialize the model with a temperature setting.
 
         :param temperature: Controls the randomness of the model's output.
         """
+        self.model = model
         self.temperature = temperature
     @abstractmethod
     def generate_response(self, messages, model) -> ModelResponse:

@@ -23,7 +23,7 @@ class ActionType(Enum):
 @dataclass
 class Message:
     """A message in the conversation history."""
-    role: str  # "system", "user", "assistant", "tool", etc.
+    role: str
     content: str
     metadata: Dict[str, Any] = field(default_factory=dict)
 
@@ -31,7 +31,6 @@ class Message:
 class AgentState:
     """The current state of an agent's processing."""
     input: Optional[GenericRequest] = None  # Current input being processed
-    user_msg: Optional[GenericRequest] = None  # Current input being processed
     history: List[Message] = field(default_factory=list)  # Conversation history
     #next_action: AgentAction = field(default_factory=lambda: AgentAction.pending())
     working_memory: Dict[str, Any] = field(default_factory=dict)  # Agent's working memory

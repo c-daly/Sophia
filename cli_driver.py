@@ -8,7 +8,7 @@ agents implemented using the stateful agent framework.
 
 import argparse
 import sys
-from typing import Dict, Any, Callable
+from typing import Dict, Callable
 from config import Configurator
 from agents.stateful_conversational_agent import StatefulConversationalAgent
 from agents.agent_loop import AgentLoop
