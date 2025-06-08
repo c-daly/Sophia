@@ -1,10 +1,11 @@
 from agents.abstract_agent import AbstractAgent
-from agents.agent_interfaces import AgentState
+from agents.agent_interfaces import AgentState, Message
 from communication.generic_response import GenericResponse
 from communication.generic_request import GenericRequest
 from models.openai_wrapper import OpenAIModel
 from prompts.prompts import DEFAULT_PROMPT, SOPHIA_PROMPT
 import agents.thinking_styles as thinking_styles
+from agents.agent_scratchpad import Scratchpad
 from agents.tool_selection_agent import ToolSelectionAgent
 from tools.registry import ToolRegistry
 from tools.web_search_tool import WebSearchTool
@@ -29,7 +30,8 @@ class SophiaAgent(AbstractAgent):
         self.prompt = system_prompt
         self.model = OpenAIModel()
         self._register_tools()
-        self.cfg.logger.debug(f"SophiaAgent initialized with prompt: {self.prompt}")
+        self.scratchpad = Scratchpad(cfg)
+        self.user_question = None
                 
     def _register_tools(self):
         """
@@ -55,10 +57,11 @@ class SophiaAgent(AbstractAgent):
         """
         # Create a new state for this session
         state = AgentState()
-        
+        sp_summary = self.scratchpad.to_prompt_summary()
+        prompt = self.prompt.replace("{user_question}", input_content).replace("{scratchpad}", sp_summary)
+        self.user_question = input_content
         # Add the system prompt and initial user message
-        state.add_message("system", self.prompt)
-        state.add_message("user", input_content)
+        state.add_message("system", prompt)
         
         # Set the input for processing
         state.input = GenericRequest(content=input_content, metadata=metadata)
@@ -88,9 +91,15 @@ class SophiaAgent(AbstractAgent):
 
                 tool_request = GenericRequest(content=tool_json['input'])
                 tool_result = tool.run(tool_request)
-                self.logger.debug(f"Tool result: {tool_result.output}")
-                self.prompt += f"\n\nTool result: {tool_result.output}"
-
+                # Add tool result to the scratchpad
+                self.cfg.logger.debug(f"Tool: {tool_name}, input: {tool_json['input']} result: {tool_result.output}")
+                self.scratchpad.add_tool_result(tool_name, tool_json['input'], tool_result.output)
+                
+            sp_summary = self.scratchpad.to_prompt_summary()
+            enriched_prompt = self.prompt.replace("{user_question}", state.input.content).replace("{scratchpad}", sp_summary)
+            self.cfg.logger.debug(f"Enriched prompt: {enriched_prompt}")
+            prompt_message = Message(role="system", content=enriched_prompt)
+            state.history[0] =prompt_message
             # This selection should ultimately be dynamic
             thinking_config = thinking_styles.ThinkingConfig(style=thinking_styles.ThinkStyle.REFLEX, max_iterations=3, cot=thinking_styles.CoTVisibility.EXPOSE)
 
