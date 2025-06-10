@@ -17,6 +17,18 @@ class TestPageParser(unittest.TestCase):
     
     def setUp(self):
         self.parser = DefaultParser()
+        # Create a basic config for the tool
+        class MockConfig:
+            def __init__(self):
+                self.logger = self
+                
+            def debug(self, msg):
+                pass
+                
+            def error(self, msg):
+                pass
+        
+        self.tool = BrowseUrlTool(MockConfig(), enable_javascript=False)
     
     def test_chunk_text(self):
         """Test text chunking functionality."""
@@ -40,14 +52,14 @@ class TestPageParser(unittest.TestCase):
         # Test basic scoring
         chunk = "This is a sample text chunk for testing."
         context = {'tag': 'p', 'section': 'main'}
-        score = self.parser.calculate_document_score(chunk, context)
+        score = self.tool.calculate_document_score(chunk, context)
         self.assertGreaterEqual(score, 0.0)
         self.assertLessEqual(score, 1.0)
         
         # Test heading boost
         context_heading = {'tag': 'h1', 'section': 'main'}
-        score_heading = self.parser.calculate_document_score(chunk, context_heading)
-        score_paragraph = self.parser.calculate_document_score(chunk, {'tag': 'p'})
+        score_heading = self.tool.calculate_document_score(chunk, context_heading)
+        score_paragraph = self.tool.calculate_document_score(chunk, {'tag': 'p'})
         self.assertGreater(score_heading, score_paragraph)
     
     def test_query_score_calculation(self):
@@ -55,19 +67,19 @@ class TestPageParser(unittest.TestCase):
         chunk = "This article discusses machine learning algorithms and neural networks."
         
         # Test exact match
-        score_exact = self.parser.calculate_query_score(chunk, "machine learning")
+        score_exact = self.tool.calculate_query_score(chunk, "machine learning")
         self.assertGreater(score_exact, 0.0)
         
         # Test partial match
-        score_partial = self.parser.calculate_query_score(chunk, "machines")
+        score_partial = self.tool.calculate_query_score(chunk, "machines")
         self.assertGreaterEqual(score_partial, 0.0)
         
         # Test no match
-        score_none = self.parser.calculate_query_score(chunk, "quantum physics")
+        score_none = self.tool.calculate_query_score(chunk, "quantum physics")
         self.assertEqual(score_none, 0.0)
         
         # Test empty query
-        score_empty = self.parser.calculate_query_score(chunk, "")
+        score_empty = self.tool.calculate_query_score(chunk, "")
         self.assertEqual(score_empty, 0.0)
 
 
@@ -130,7 +142,24 @@ class TestDefaultParser(unittest.TestCase):
         </html>
         """
         
+        # Parse first, then apply scoring using tool
         result = self.parser.parse("http://test.com", html, user_query="machine learning")
+        
+        # Create a tool instance to handle scoring
+        class MockConfig:
+            def __init__(self):
+                self.logger = self
+                
+            def debug(self, msg):
+                pass
+                
+            def error(self, msg):
+                pass
+        
+        tool = BrowseUrlTool(MockConfig(), enable_javascript=False)
+        
+        # Apply scoring
+        tool._apply_scoring(result, "machine learning")
         
         # Check that query scores were calculated
         for chunk in result.visible_text_chunks:

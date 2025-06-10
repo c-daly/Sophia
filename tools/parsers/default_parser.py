@@ -131,8 +131,8 @@ class DefaultParser(PageParser):
             if body:
                 chunks.extend(self._process_element(body, 'body', user_query))
         
-        # Sort by document score and limit
-        chunks = sorted(chunks, key=lambda x: x.document_score, reverse=True)
+        # Sort by length (as a simple heuristic) and limit
+        chunks = sorted(chunks, key=lambda x: len(x.text), reverse=True)
         return chunks[:self.max_chunks]
     
     def _process_element(self, element: Tag, section: str, 
@@ -144,14 +144,10 @@ class DefaultParser(PageParser):
         for heading in element.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']):
             text = heading.get_text().strip()
             if text:
-                context = {'tag': heading.name, 'section': section}
-                doc_score = self.calculate_document_score(text, context)
-                query_score = self.calculate_query_score(text, user_query) if user_query else None
-                
                 chunks.append(ContentChunk(
                     text=text,
-                    document_score=doc_score,
-                    query_score=query_score,
+                    document_score=0.0,  # Will be calculated by the tool
+                    query_score=None,    # Will be calculated by the tool
                     section=section,
                     tag=heading.name
                 ))
@@ -169,14 +165,10 @@ class DefaultParser(PageParser):
                 text_chunks = self.chunk_text(text, self.max_chunk_size)
                 
                 for chunk_text in text_chunks:
-                    context = {'tag': para.name, 'section': section}
-                    doc_score = self.calculate_document_score(chunk_text, context)
-                    query_score = self.calculate_query_score(chunk_text, user_query) if user_query else None
-                    
                     chunks.append(ContentChunk(
                         text=chunk_text,
-                        document_score=doc_score,
-                        query_score=query_score,
+                        document_score=0.0,  # Will be calculated by the tool
+                        query_score=None,    # Will be calculated by the tool
                         section=section,
                         tag=para.name
                     ))

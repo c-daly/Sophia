@@ -7,8 +7,10 @@ content using pluggable parsers, and return structured JSON data.
 
 import json
 import time
+import math
 from typing import Optional, Dict, Any, Type
 from urllib.parse import urlparse
+from collections import Counter
 
 import requests
 from selenium import webdriver
@@ -77,6 +79,132 @@ class BrowseUrlTool(AbstractTool):
         """List available parsers and their descriptions."""
         return {name: parser.description for name, parser in self.parsers.items()}
     
+    def calculate_document_score(self, chunk: str, context: Dict[str, Any]) -> float:
+        """
+        Calculate how relevant a chunk is to the overall document.
+        
+        Uses improved heuristics based on content length, position, and HTML structure.
+        
+        Args:
+            chunk: The text chunk to score
+            context: Additional context (e.g., position, HTML structure)
+            
+        Returns:
+            Score between 0.0 and 1.0
+        """
+        # Base score from text length (longer content generally more important)
+        base_score = min(len(chunk) / 500.0, 1.0)
+        
+        # Boost score based on HTML context
+        tag = context.get('tag', '').lower()
+        if tag in ['h1', 'h2', 'h3', 'title']:
+            base_score *= 1.5
+        elif tag in ['h4', 'h5', 'h6']:
+            base_score *= 1.3
+        elif tag in ['p', 'div', 'article']:
+            base_score *= 1.0
+        elif tag in ['span', 'small']:
+            base_score *= 0.8
+        
+        # Boost based on section importance
+        section = context.get('section', '').lower()
+        if section in ['main', 'article', 'content']:
+            base_score *= 1.2
+        elif section == 'body':
+            base_score *= 1.0
+        else:
+            base_score *= 0.9
+        
+        return min(base_score, 1.0)
+    
+    def calculate_query_score(self, chunk: str, query: str) -> float:
+        """
+        Calculate how relevant a chunk is to a specific query using cosine similarity.
+        
+        This implementation uses a simple bag-of-words approach with TF-IDF-like weighting
+        and cosine similarity for better semantic matching than simple keyword counting.
+        
+        Args:
+            chunk: The text chunk to score
+            query: The user query
+            
+        Returns:
+            Score between 0.0 and 1.0
+        """
+        if not query or not chunk:
+            return 0.0
+        
+        # Normalize text
+        chunk_words = self._normalize_text(chunk).split()
+        query_words = self._normalize_text(query).split()
+        
+        if not chunk_words or not query_words:
+            return 0.0
+        
+        # Create term frequency vectors
+        chunk_tf = Counter(chunk_words)
+        query_tf = Counter(query_words)
+        
+        # Get all unique terms
+        all_terms = set(chunk_words + query_words)
+        
+        # Calculate cosine similarity
+        return self._cosine_similarity(chunk_tf, query_tf, all_terms)
+    
+    def _normalize_text(self, text: str) -> str:
+        """Normalize text for better matching."""
+        import re
+        # Convert to lowercase and remove punctuation
+        text = re.sub(r'[^\w\s]', ' ', text.lower())
+        # Remove extra whitespace
+        text = ' '.join(text.split())
+        return text
+    
+    def _cosine_similarity(self, vec1: Counter, vec2: Counter, all_terms: set) -> float:
+        """Calculate cosine similarity between two term frequency vectors."""
+        # Calculate dot product
+        dot_product = sum(vec1.get(term, 0) * vec2.get(term, 0) for term in all_terms)
+        
+        # Calculate magnitudes
+        magnitude1 = math.sqrt(sum(vec1.get(term, 0) ** 2 for term in all_terms))
+        magnitude2 = math.sqrt(sum(vec2.get(term, 0) ** 2 for term in all_terms))
+        
+        # Avoid division by zero
+        if magnitude1 == 0 or magnitude2 == 0:
+            return 0.0
+        
+        return dot_product / (magnitude1 * magnitude2)
+    
+    def _apply_scoring(self, parsed_content, user_query: Optional[str]):
+        """Apply scoring to content chunks using the tool's scoring methods."""
+        for chunk in parsed_content.visible_text_chunks:
+            # Calculate document score
+            context = {
+                'tag': chunk.tag,
+                'section': chunk.section
+            }
+            chunk.document_score = self.calculate_document_score(chunk.text, context)
+            
+            # Calculate query score if query provided
+            if user_query:
+                chunk.query_score = self.calculate_query_score(chunk.text, user_query)
+            else:
+                chunk.query_score = None
+        
+        # Sort chunks by document score (and query score if available)
+        if user_query:
+            # Sort by combined score: 70% query relevance + 30% document score
+            parsed_content.visible_text_chunks.sort(
+                key=lambda x: (x.query_score or 0) * 0.7 + x.document_score * 0.3,
+                reverse=True
+            )
+        else:
+            # Sort by document score only
+            parsed_content.visible_text_chunks.sort(
+                key=lambda x: x.document_score,
+                reverse=True
+            )
+    
     def run(self, request: GenericRequest) -> GenericResponse:
         """
         Process a browse URL request.
@@ -121,6 +249,9 @@ class BrowseUrlTool(AbstractTool):
             
             # Parse content
             parsed_content = parser.parse(url, html_content, title, user_query)
+            
+            # Apply scoring using the tool's scoring methods
+            self._apply_scoring(parsed_content, user_query)
             
             # Convert to JSON output
             output = self._format_output(parsed_content)
